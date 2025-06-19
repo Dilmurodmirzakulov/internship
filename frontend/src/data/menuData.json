@@ -1,0 +1,84 @@
+[
+  {
+    "header": "",
+    "items": [
+      {
+        "text": "Dashboard",
+        "icon": "bx bx-home-circle",
+        "available": true,
+        "link": "/",
+        "roles": ["super_admin", "teacher", "student"]
+      }
+    ]
+  },
+  {
+    "header": "ADMINISTRATION",
+    "roles": ["super_admin"],
+    "items": [
+      {
+        "text": "User Management",
+        "icon": "bx bx-user",
+        "available": true,
+        "link": "",
+        "roles": ["super_admin"],
+        "submenu": [
+          {
+            "text": "All Users",
+            "available": true,
+            "link": "/admin/users"
+          },
+          {
+            "text": "Groups",
+            "available": true,
+            "link": "/admin/groups"
+          }
+        ]
+      },
+      {
+        "text": "Programs",
+        "icon": "bx bx-calendar",
+        "available": true,
+        "link": "/admin/programs",
+        "roles": ["super_admin"]
+      }
+    ]
+  },
+  {
+    "header": "TEACHING",
+    "roles": ["teacher"],
+    "items": [
+      {
+        "text": "My Students",
+        "icon": "bx bx-group",
+        "available": true,
+        "link": "/teacher/students",
+        "roles": ["teacher"]
+      }
+    ]
+  },
+  {
+    "header": "STUDENT LIFE",
+    "roles": ["student"],
+    "items": [
+      {
+        "text": "My Diary",
+        "icon": "bx bx-book-open",
+        "available": true,
+        "link": "/student/diary",
+        "roles": ["student"]
+      }
+    ]
+  },
+  {
+    "header": "ACCOUNT",
+    "items": [
+      {
+        "text": "Profile",
+        "icon": "bx bx-user-circle",
+        "available": true,
+        "link": "/account",
+        "roles": ["super_admin", "teacher", "student"]
+      }
+    ]
+  }
+]
