@@ -61,7 +61,10 @@
       "thursday": "Payshanba",
       "friday": "Juma",
       "saturday": "Shanba"
-    }
+    },
+    "date": "Sana",
+    "status": "Holat",
+    "actions": "Amallar"
   },
   "auth": {
     "login": "Tizimga kirish",
@@ -208,7 +211,21 @@
     "saveAsDraft": "Qoralama sifatida saqlash",
     "backToDiary": "Kundalikga qaytish",
     "validDates": "Yaroqli sanalar {{start}} - {{end}}",
-    "activePrograms": "Faol dasturlar"
+    "activePrograms": "Faol dasturlar",
+    "submitted": "Yuborilgan",
+    "marked": "Baholangan",
+    "editEntry": "Kundalik yozuvini tahrirlash",
+    "editingEntryFor": "{{date}} uchun yozuvni tahrirlash",
+    "entryStatus": "Yozuv holati",
+    "on": "sanada",
+    "teacherEvaluation": "O'qituvchi bahosi",
+    "filePreview": "Fayl ko'rinishi",
+    "fileAttached": "Fayl biriktirildi",
+    "currentAttachment": "Joriy ilova",
+    "download": "Yuklab olish",
+    "submitting": "Yuborilmoqda...",
+    "cannotEdit": "Bu yozuvni tahrirlash mumkin emas.",
+    "reportHelp": "Kundalik faoliyatingiz haqida qisqacha yozing."
   },
   "dashboard": {
     "welcome": "Xush kelibsiz {{name}}!",

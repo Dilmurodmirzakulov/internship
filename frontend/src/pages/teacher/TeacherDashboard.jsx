@@ -244,6 +244,9 @@ const TeacherDashboard = () => {
                     </thead>
                     <tbody>
                       {pendingEntries.slice(0, 10).map(entry => {
+                        const student = students.find(s =>
+                          s.diary_entries.some(e => e.id === entry.id)
+                        );
                         const daysAgo = Math.floor(
                           (new Date() - new Date(entry.submitted_at)) /
                             (1000 * 60 * 60 * 24)
@@ -267,13 +270,13 @@ const TeacherDashboard = () => {
                               <div className="d-flex align-items-center">
                                 <div className="avatar avatar-sm me-2">
                                   <span className="avatar-initial rounded-circle bg-label-primary">
-                                    {entry.student?.name
-                                      ?.charAt(0)
-                                      ?.toUpperCase() || '?'}
+                                    {student
+                                      ? student.name.charAt(0).toUpperCase()
+                                      : '?'}
                                   </span>
                                 </div>
                                 <span>
-                                  {entry.student?.name || 'Unknown Student'}
+                                  {student ? student.name : 'Unknown Student'}
                                 </span>
                               </div>
                             </td>

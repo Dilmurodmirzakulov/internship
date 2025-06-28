@@ -115,7 +115,7 @@ const AttendancePage = () => {
           </select>
         </div>
         <div className="col-md-4 mb-2">
-          <label className="form-label">{t('attendance.date')}</label>
+          <label className="form-label">{t('attendance.date')}</label><br />
           <DatePicker
             selected={date}
             onChange={setDate}
