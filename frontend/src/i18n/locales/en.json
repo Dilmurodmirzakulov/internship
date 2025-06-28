@@ -107,7 +107,8 @@
     "studentDiaries": "Student Diaries",
     "studentLife": "STUDENT LIFE",
     "addEntry": "Add Entry",
-    "profile": "Profile"
+    "profile": "Profile",
+    "attendance": "Attendance"
   },
   "user": {
     "name": "Name",
@@ -657,5 +658,17 @@
       "weekend": "Weekend",
       "upcoming": "Upcoming"
     }
+  },
+  "attendance": {
+    "title": "Attendance",
+    "group": "Group",
+    "date": "Date",
+    "status": "Status",
+    "present": "Present",
+    "absent": "Absent",
+    "excused": "Excused",
+    "save": "Save Attendance",
+    "saving": "Saving...",
+    "saved": "Attendance saved successfully!"
   }
 }

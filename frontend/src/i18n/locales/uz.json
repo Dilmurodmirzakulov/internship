@@ -107,7 +107,8 @@
     "studentDiaries": "Talaba kundaliklari",
     "studentLife": "TALABA HAYOTI",
     "addEntry": "Yozuv qo'shish",
-    "profile": "Profil"
+    "profile": "Profil",
+    "attendance": "Davomat"
   },
   "user": {
     "name": "Ism",
@@ -787,8 +788,7 @@
       "draft": "Qoralama",
       "missing": "Etishmayotgan",
       "holiday": "Bayram",
-      "weekend": "Dam olish kuni",
-      "upcoming": "Kelayotgan"
+      "weekend": "Dam olish kuni"
     }
   }
 }

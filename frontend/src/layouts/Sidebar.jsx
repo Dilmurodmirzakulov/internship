@@ -174,6 +174,7 @@ const MenuItem = ({ item }) => {
       Students: t('navigation.students'),
       'Student Diary': t('navigation.studentDiary'),
       'Review Entry': t('navigation.reviewEntry'),
+      Attendance: t('navigation.attendance'),
       Admin: t('navigation.admin'),
       Student: t('navigation.student'),
       Teacher: t('navigation.teacher'),

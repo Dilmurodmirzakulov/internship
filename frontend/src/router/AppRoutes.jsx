@@ -41,6 +41,7 @@ import NotificationsPage from '../pages/NotificationsPage';
 import ErrorPage from '../pages/misc/ErrorPage';
 
 import AdminDashboard from '../pages/admin/AdminDashboard';
+import AttendancePage from '../pages/teacher/AttendancePage';
 
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuthStore();
@@ -163,6 +164,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRole="teacher">
             <ReviewEntryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/attendance"
+        element={
+          <ProtectedRoute requiredRole="teacher">
+            <AttendancePage />
           </ProtectedRoute>
         }
       />

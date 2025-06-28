@@ -107,7 +107,8 @@
     "studentDiaries": "Дневники студентов",
     "studentLife": "СТУДЕНЧЕСКАЯ ЖИЗНЬ",
     "addEntry": "Добавить запись",
-    "profile": "Профиль"
+    "profile": "Профиль",
+    "attendance": "Посещаемость"
   },
   "user": {
     "name": "Имя",
