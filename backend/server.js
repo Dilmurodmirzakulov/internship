@@ -35,11 +35,13 @@ app.use(
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "development" ? 500 : 100, // Higher limit for development
+  max: process.env.NODE_ENV === "development" ? 1000 : 500, // More generous limits
   message: {
     error: "Too many requests from this IP, please try again later.",
     retryAfter: "15 minutes",
   },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 app.use(limiter);
 
@@ -48,22 +50,31 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://beautiful-boba-4352fc.netlify.app",
+  "https://685f9488966d03230038ae17--beautiful-boba-4352fc.netlify.app", // Latest deploy URL
   process.env.FRONTEND_URL,
 ].filter(Boolean);
+
+console.log("🌐 Allowed CORS origins:", allowedOrigins);
 
 app.use(
   cors({
     origin: function (origin, callback) {
+      console.log("🔍 CORS request from origin:", origin);
+
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.indexOf(origin) !== -1) {
+        console.log("✅ CORS allowed for:", origin);
         callback(null, true);
       } else {
+        console.log("❌ CORS blocked for:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 
