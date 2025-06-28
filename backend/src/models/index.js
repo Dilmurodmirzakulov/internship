@@ -3,6 +3,7 @@ const Group = require("./Group");
 const InternshipProgram = require("./InternshipProgram");
 const DiaryEntry = require("./DiaryEntry");
 const Notification = require("./Notification");
+const Attendance = require("./Attendance");
 
 // Create junction table for Teacher-Group many-to-many relationship
 const TeacherGroup = require("../database/connection").sequelize.define(
@@ -136,12 +137,20 @@ DiaryEntry.belongsTo(User, { as: "teacher", foreignKey: "teacher_id" });
 // User - Notification associations
 User.hasMany(Notification, { foreignKey: "user_id", as: "notifications" });
 
+// Attendance associations
+User.hasMany(Attendance, {
+  as: "attendance_records",
+  foreignKey: "student_id",
+});
+Attendance.belongsTo(User, { as: "student", foreignKey: "student_id" });
+
 module.exports = {
   User,
   Group,
   InternshipProgram,
   DiaryEntry,
   Notification,
+  Attendance,
   TeacherGroup,
   ProgramGroup,
 };

@@ -14,6 +14,7 @@ const programRoutes = require("./src/routes/programs");
 const diaryRoutes = require("./src/routes/diary");
 const uploadRoutes = require("./src/routes/upload");
 const notificationRoutes = require("./src/routes/notifications");
+const attendanceRoutes = require("./src/routes/attendance");
 const NotificationService = require("./src/services/notificationService");
 
 const errorHandler = require("./src/middleware/errorHandler");
@@ -125,6 +126,7 @@ app.use("/api/programs", authMiddleware, programRoutes);
 app.use("/api/diary", authMiddleware, diaryRoutes);
 app.use("/api/upload", authMiddleware, uploadRoutes);
 app.use("/api/notifications", authMiddleware, notificationRoutes);
+app.use("/api/attendance", authMiddleware, attendanceRoutes);
 
 /**
  * @swagger
