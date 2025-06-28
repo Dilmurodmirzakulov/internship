@@ -194,7 +194,21 @@
       "holiday": "Holiday",
       "weekend": "Weekend",
       "upcoming": "Upcoming"
-    }
+    },
+    "newEntry": "New Entry",
+    "documentActivities": "Document your daily activities and learnings in your internship diary.",
+    "entryDetails": "Entry Details",
+    "entryDate": "Entry Date",
+    "dailyReport": "Daily Report",
+    "attachment": "Attachment",
+    "selectDateHelp": "Select the date for your diary entry.",
+    "reportPlaceholder": "Describe your activities, tasks, and learnings for the day...",
+    "attachmentHelp": "Optional: Attach a file (image, PDF, etc.)",
+    "submitEntry": "Submit Entry",
+    "saveAsDraft": "Save as Draft",
+    "backToDiary": "Back to Diary",
+    "validDates": "Valid dates {{start}} - {{end}}",
+    "activePrograms": "Active Programs"
   },
   "dashboard": {
     "welcome": "Welcome {{name}}!",

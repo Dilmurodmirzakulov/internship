@@ -361,7 +361,10 @@ router.post(
     body("message").isLength({ min: 1, max: 1000 }),
     body("priority").optional().isIn(["low", "medium", "high", "urgent"]),
     body("userRoles").optional().isArray(),
-    body("actionUrl").optional().isURL(),
+    body("actionUrl")
+      .optional({ nullable: true, checkFalsy: true })
+      .isURL()
+      .withMessage("Invalid URL for actionUrl"),
   ],
   async (req, res) => {
     try {
@@ -386,7 +389,7 @@ router.post(
         message,
         priority,
         userRoles,
-        actionUrl,
+        actionUrl: actionUrl || null,
       });
 
       res.json({ message: "System announcement sent successfully." });

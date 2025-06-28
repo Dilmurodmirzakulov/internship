@@ -14,7 +14,7 @@ const NotificationsPage = () => {
   const [typeFilter, setTypeFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const { token } = useAuthStore();
+  const { token } = useAuthStore(state => ({ token: state.token }));
   const addNotification = useUIStore(state => state.addNotification);
 
   // Fetch notifications

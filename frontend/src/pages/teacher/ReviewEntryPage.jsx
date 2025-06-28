@@ -89,7 +89,7 @@ const ReviewEntryPage = () => {
         await fetchDiaryEntry();
 
         setTimeout(() => {
-          navigate(`/teacher/student/${entry.student.id}/diary`);
+          navigate(`/teacher/student/${entry.student?.id || 'unknown'}/diary`);
         }, 1500);
       } else {
         const errorData = await response.json();
@@ -179,13 +179,16 @@ const ReviewEntryPage = () => {
         <div>
           <h4 className="fw-bold mb-1">Review Diary Entry</h4>
           <p className="text-muted mb-0">
-            {entry.student.name} - {formatDate(entry.entry_date)}
+            {entry.student?.name || 'Unknown Student'} -{' '}
+            {formatDate(entry.entry_date)}
           </p>
         </div>
         <button
           type="button"
           className="btn btn-outline-secondary"
-          onClick={() => navigate(`/teacher/student/${entry.student.id}/diary`)}
+          onClick={() =>
+            navigate(`/teacher/student/${entry.student?.id || 'unknown'}/diary`)
+          }
         >
           <i className="bx bx-arrow-back me-1"></i>
           Back to Student Diary
@@ -213,12 +216,16 @@ const ReviewEntryPage = () => {
               <div className="d-flex align-items-center">
                 <div className="avatar avatar-lg me-3">
                   <span className="avatar-initial rounded-circle bg-label-primary">
-                    {entry.student.name.charAt(0).toUpperCase()}
+                    {entry.student?.name?.charAt(0)?.toUpperCase() || '?'}
                   </span>
                 </div>
                 <div className="flex-grow-1">
-                  <h5 className="mb-1">{entry.student.name}</h5>
-                  <p className="text-muted mb-0">{entry.student.email}</p>
+                  <h5 className="mb-1">
+                    {entry.student?.name || 'Unknown Student'}
+                  </h5>
+                  <p className="text-muted mb-0">
+                    {entry.student?.email || 'No email'}
+                  </p>
                 </div>
                 <div>
                   {entry.is_submitted ? (

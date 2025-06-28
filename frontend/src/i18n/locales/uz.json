@@ -194,7 +194,21 @@
       "holiday": "Bayram",
       "weekend": "Dam olish kuni",
       "upcoming": "Kelayotgan"
-    }
+    },
+    "newEntry": "Yangi kundalik yozuvi",
+    "documentActivities": "Amaliyot kundaligida har kungi faoliyatingiz va o'rganishlaringizni hujjatlang.",
+    "entryDetails": "Kundalik tafsilotlari",
+    "entryDate": "Kundalik sanasi",
+    "dailyReport": "Kunlik hisobot",
+    "attachment": "Ilova fayl",
+    "selectDateHelp": "Kundalik uchun sanani tanlang.",
+    "reportPlaceholder": "Kundalik faoliyatingiz, vazifalaringiz va o'rganishlaringizni tasvirlab bering...",
+    "attachmentHelp": "Ixtiyoriy: Fayl biriktiring (rasm, PDF va boshqalar)",
+    "submitEntry": "Yozuvni yuborish",
+    "saveAsDraft": "Qoralama sifatida saqlash",
+    "backToDiary": "Kundalikga qaytish",
+    "validDates": "Yaroqli sanalar {{start}} - {{end}}",
+    "activePrograms": "Faol dasturlar"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz {{name}}!",

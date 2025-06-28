@@ -267,10 +267,14 @@ const TeacherDashboard = () => {
                               <div className="d-flex align-items-center">
                                 <div className="avatar avatar-sm me-2">
                                   <span className="avatar-initial rounded-circle bg-label-primary">
-                                    {entry.student.name.charAt(0).toUpperCase()}
+                                    {entry.student?.name
+                                      ?.charAt(0)
+                                      ?.toUpperCase() || '?'}
                                   </span>
                                 </div>
-                                <span>{entry.student.name}</span>
+                                <span>
+                                  {entry.student?.name || 'Unknown Student'}
+                                </span>
                               </div>
                             </td>
                             <td>{formatDate(entry.entry_date)}</td>
@@ -357,11 +361,11 @@ const TeacherDashboard = () => {
                       <div className="d-flex align-items-center mb-2">
                         <div className="avatar avatar-xs me-2">
                           <span className="avatar-initial rounded-circle bg-label-info">
-                            {student.name.charAt(0).toUpperCase()}
+                            {student.name?.charAt(0)?.toUpperCase() || '?'}
                           </span>
                         </div>
                         <small className="text-muted">
-                          {student.name} -{' '}
+                          {student.name || 'Unknown Student'} -{' '}
                           {student.diary_entries
                             ? student.diary_entries.length
                             : 0}{' '}

@@ -158,6 +158,16 @@ const UsersManagementPage = () => {
       // Only send assigned_group_ids for teachers
       if (submitData.role !== 'teacher') {
         delete submitData.assigned_group_ids;
+      } else {
+        // For teachers, handle group_id logic
+        if (
+          submitData.assigned_group_ids &&
+          submitData.assigned_group_ids.length === 1
+        ) {
+          submitData.group_id = submitData.assigned_group_ids[0];
+        } else {
+          submitData.group_id = '';
+        }
       }
 
       const response = await fetch(url, {
@@ -213,15 +223,12 @@ const UsersManagementPage = () => {
 
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(
-        `${API_BASE_URL}/users/${userToDelete.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/${userToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         setSuccess(t('errors.userDeletedSuccessfully'));

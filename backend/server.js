@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
 const path = require("path");
 require("dotenv").config();
 
@@ -66,27 +65,11 @@ app.use(
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
-
-// Rate limiting - DISABLED for debugging and development
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 10000, // Very high limit
-//   message: {
-//     error: "Too many requests from this IP, please try again later.",
-//     retryAfter: "15 minutes",
-//   },
-//   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-//   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-//   skip: (req) => {
-//     // Skip rate limiting for health checks and development
-//     return req.path === "/api/health" || process.env.NODE_ENV === "development";
-//   },
-// });
-// app.use(limiter);
+app.options("*", cors());
 
 console.log("🚀 Rate limiting DISABLED for debugging");
 

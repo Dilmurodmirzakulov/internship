@@ -155,6 +155,14 @@ router.get("/", requireSuperAdmin, async (req, res) => {
 
     const offset = (page - 1) * limit;
 
+    // Debug logging
+    console.log("Pagination debug:", {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      calculatedOffset: (parseInt(page) - 1) * parseInt(limit),
+    });
+
     const users = await User.findAndCountAll({
       where,
       include: [
@@ -176,6 +184,12 @@ router.get("/", requireSuperAdmin, async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [["created_at", "DESC"]],
+    });
+
+    console.log("Query result:", {
+      totalCount: users.count,
+      returnedRows: users.rows.length,
+      totalPages: Math.ceil(users.count / limit),
     });
 
     res.json({
