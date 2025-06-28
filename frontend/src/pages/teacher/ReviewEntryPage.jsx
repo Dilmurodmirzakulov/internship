@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const ReviewEntryPage = () => {
   const [entry, setEntry] = useState(null);
@@ -23,11 +24,14 @@ const ReviewEntryPage = () => {
   const fetchDiaryEntry = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/diary/entry-by-id/${entryId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/diary/entry-by-id/${entryId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -67,7 +71,7 @@ const ReviewEntryPage = () => {
 
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/diary/mark/${entryId}`, {
+      const response = await fetch(`${API_BASE_URL}/diary/mark/${entryId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

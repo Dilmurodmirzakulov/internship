@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const StudentDiaryPage = () => {
   const [student, setStudent] = useState(null);
@@ -18,11 +19,14 @@ const StudentDiaryPage = () => {
   const fetchStudentDiary = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/diary/student/${studentId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/diary/student/${studentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();

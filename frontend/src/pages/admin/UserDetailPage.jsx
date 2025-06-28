@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import Layout from '../../layouts/Layout';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import API_BASE_URL from '../../config/api';
 
 const UserDetailPage = () => {
   const { t } = useTranslation();
@@ -37,7 +38,7 @@ const UserDetailPage = () => {
     try {
       setLoading(true);
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -67,7 +68,7 @@ const UserDetailPage = () => {
   const fetchUserDiaryStats = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/diary/student/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/diary/student/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -111,7 +112,7 @@ const UserDetailPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const response = await fetch(
-        `/api/notifications?user_id=${userId}&limit=5`,
+        `${API_BASE_URL}/notifications?user_id=${userId}&limit=5`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -140,7 +141,7 @@ const UserDetailPage = () => {
     e.preventDefault();
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -191,93 +192,89 @@ const UserDetailPage = () => {
 
   if (error) {
     return (
-      <Layout>
-        <div className="container-xxl flex-grow-1 container-p-y">
-          <div className="row">
-            <div className="col-12">
-              <div className="card">
-                <div className="card-body text-center">
-                  <div className="error-container">
-                    <h4 className="text-danger">{error}</h4>
-                    <p className="text-muted">{t('userDetail.userNotFound')}</p>
-                    <Link to="/admin/users" className="btn btn-primary">
-                      <i className="bx bx-arrow-back me-2"></i>
-                      {t('userDetail.backToUsers')}
-                    </Link>
-                  </div>
+      <div className="container-xxl flex-grow-1 container-p-y px-0">
+        <div className="row">
+          <div className="col-12">
+            <div className="card">
+              <div className="card-body text-center">
+                <div className="error-container">
+                  <h4 className="text-danger">{error}</h4>
+                  <p className="text-muted">{t('userDetail.userNotFound')}</p>
+                  <Link to="/admin/users" className="btn btn-primary">
+                    <i className="bx bx-arrow-back me-2"></i>
+                    {t('userDetail.backToUsers')}
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="container-xxl flex-grow-1 container-p-y">
-        {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="mb-4">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item">
-              <Link to="/admin/dashboard">{t('userDetail.dashboard')}</Link>
-            </li>
-            <li className="breadcrumb-item">
-              <Link to="/admin/users">{t('userDetail.users')}</Link>
-            </li>
-            <li className="breadcrumb-item active" aria-current="page">
-              {user?.name}
-            </li>
-          </ol>
-        </nav>
+    <div className="container-xxl flex-grow-1 container-p-y px-0">
+      {/* Breadcrumb */}
+      <nav aria-label="breadcrumb" className="mb-4">
+        <ol className="breadcrumb">
+          <li className="breadcrumb-item">
+            <Link to="/admin/dashboard">{t('userDetail.dashboard')}</Link>
+          </li>
+          <li className="breadcrumb-item">
+            <Link to="/admin/users">{t('userDetail.users')}</Link>
+          </li>
+          <li className="breadcrumb-item active" aria-current="page">
+            {user?.name}
+          </li>
+        </ol>
+      </nav>
 
-        {/* User Header */}
-        <div className="row">
-          <div className="col-12">
-            <div className="card mb-4">
-              <div className="card-body">
-                <div className="row align-items-center">
-                  <div className="col-sm-auto">
-                    <div className="avatar avatar-xl me-3">
-                      <span className="avatar-initial rounded-circle bg-label-primary">
-                        {user?.name?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
+      {/* User Header */}
+      <div className="row">
+        <div className="col-12">
+          <div className="card mb-4">
+            <div className="card-body">
+              <div className="row align-items-center">
+                <div className="col-sm-auto">
+                  <div className="avatar avatar-xl me-3">
+                    <span className="avatar-initial rounded-circle bg-label-primary">
+                      {user?.name?.charAt(0).toUpperCase()}
+                    </span>
                   </div>
-                  <div className="col-sm">
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>
-                        <h4 className="mb-1">{user?.name}</h4>
-                        <p className="text-muted mb-0">{user?.email}</p>
-                        <div className="mt-2">
-                          {getRoleBadge(user?.role)}
-                          <span className="mx-2">
-                            {getStatusBadge(user?.is_active)}
+                </div>
+                <div className="col-sm">
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <h4 className="mb-1">{user?.name}</h4>
+                      <p className="text-muted mb-0">{user?.email}</p>
+                      <div className="mt-2">
+                        {getRoleBadge(user?.role)}
+                        <span className="mx-2">
+                          {getStatusBadge(user?.is_active)}
+                        </span>
+                        {user?.group && (
+                          <span className="badge bg-outline-primary">
+                            {t('user.group')}: {user.group.name}
                           </span>
-                          {user?.group && (
-                            <span className="badge bg-outline-primary">
-                              {t('user.group')}: {user.group.name}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
-                      <div className="d-flex gap-2">
-                        <button
-                          className="btn btn-primary"
-                          onClick={() => setShowEditModal(true)}
-                        >
-                          <i className="bx bx-edit me-1"></i>
-                          {t('userDetail.editUser')}
-                        </button>
-                        <Link
-                          to="/admin/users"
-                          className="btn btn-outline-secondary"
-                        >
-                          <i className="bx bx-arrow-back me-1"></i>
-                          {t('userDetail.backToUsers')}
-                        </Link>
-                      </div>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => setShowEditModal(true)}
+                      >
+                        <i className="bx bx-edit me-1"></i>
+                        {t('userDetail.editUser')}
+                      </button>
+                      <Link
+                        to="/admin/users"
+                        className="btn btn-outline-secondary"
+                      >
+                        <i className="bx bx-arrow-back me-1"></i>
+                        {t('userDetail.backToUsers')}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -285,604 +282,590 @@ const UserDetailPage = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Tabs Navigation */}
-        <div className="row">
-          <div className="col-12">
-            <div className="card">
-              <div className="card-header">
-                <div className="nav-align-top mb-4">
-                  <ul className="nav nav-tabs" role="tablist">
+      {/* Tabs Navigation */}
+      <div className="row">
+        <div className="col-12">
+          <div className="card">
+            <div className="card-header">
+              <div className="nav-align-top mb-4">
+                <ul className="nav nav-tabs" role="tablist">
+                  <li className="nav-item">
+                    <button
+                      type="button"
+                      className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('overview')}
+                    >
+                      <i className="bx bx-user me-2"></i>
+                      {t('userDetail.overview')}
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      type="button"
+                      className={`nav-link ${activeTab === 'details' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('details')}
+                    >
+                      <i className="bx bx-detail me-2"></i>
+                      {t('userDetail.details')}
+                    </button>
+                  </li>
+                  {user?.role === 'student' && (
                     <li className="nav-item">
                       <button
                         type="button"
-                        className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('overview')}
+                        className={`nav-link ${activeTab === 'diary' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('diary')}
                       >
-                        <i className="bx bx-user me-2"></i>
-                        {t('userDetail.overview')}
+                        <i className="bx bx-book me-2"></i>
+                        {t('userDetail.diaryActivity')}
                       </button>
                     </li>
-                    <li className="nav-item">
-                      <button
-                        type="button"
-                        className={`nav-link ${activeTab === 'details' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('details')}
-                      >
-                        <i className="bx bx-detail me-2"></i>
-                        {t('userDetail.details')}
-                      </button>
-                    </li>
-                    {user?.role === 'student' && (
-                      <li className="nav-item">
-                        <button
-                          type="button"
-                          className={`nav-link ${activeTab === 'diary' ? 'active' : ''}`}
-                          onClick={() => setActiveTab('diary')}
-                        >
-                          <i className="bx bx-book me-2"></i>
-                          {t('userDetail.diaryActivity')}
-                        </button>
-                      </li>
-                    )}
-                    <li className="nav-item">
-                      <button
-                        type="button"
-                        className={`nav-link ${activeTab === 'notifications' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('notifications')}
-                      >
-                        <i className="bx bx-bell me-2"></i>
-                        {t('userDetail.notifications')}
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                  )}
+                  <li className="nav-item">
+                    <button
+                      type="button"
+                      className={`nav-link ${activeTab === 'notifications' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('notifications')}
+                    >
+                      <i className="bx bx-bell me-2"></i>
+                      {t('userDetail.notifications')}
+                    </button>
+                  </li>
+                </ul>
               </div>
+            </div>
 
-              <div className="card-body">
-                {/* Overview Tab */}
-                {activeTab === 'overview' && (
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="card border h-100">
-                        <div className="card-header">
-                          <h5 className="card-title mb-0">
-                            {t('userDetail.basicInformation')}
-                          </h5>
-                        </div>
-                        <div className="card-body">
-                          <div className="row mb-3">
-                            <div className="col-sm-4">
-                              <h6 className="mb-0">
-                                {t('userDetail.fullName')}:
-                              </h6>
-                            </div>
-                            <div className="col-sm-8">
-                              <p className="text-muted mb-0">{user?.name}</p>
-                            </div>
-                          </div>
-                          <div className="row mb-3">
-                            <div className="col-sm-4">
-                              <h6 className="mb-0">{t('userDetail.email')}:</h6>
-                            </div>
-                            <div className="col-sm-8">
-                              <p className="text-muted mb-0">{user?.email}</p>
-                            </div>
-                          </div>
-                          <div className="row mb-3">
-                            <div className="col-sm-4">
-                              <h6 className="mb-0">{t('userDetail.role')}:</h6>
-                            </div>
-                            <div className="col-sm-8">
-                              {getRoleBadge(user?.role)}
-                            </div>
-                          </div>
-                          <div className="row mb-3">
-                            <div className="col-sm-4">
-                              <h6 className="mb-0">
-                                {t('userDetail.status')}:
-                              </h6>
-                            </div>
-                            <div className="col-sm-8">
-                              {getStatusBadge(user?.is_active)}
-                            </div>
-                          </div>
-                          <div className="row mb-3">
-                            <div className="col-sm-4">
-                              <h6 className="mb-0">
-                                {t('userDetail.created')}:
-                              </h6>
-                            </div>
-                            <div className="col-sm-8">
-                              <p className="text-muted mb-0">
-                                {new Date(
-                                  user?.created_at
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-4">
-                              <h6 className="mb-0">
-                                {t('userDetail.lastUpdated')}:
-                              </h6>
-                            </div>
-                            <div className="col-sm-8">
-                              <p className="text-muted mb-0">
-                                {new Date(
-                                  user?.updated_at
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+            <div className="card-body">
+              {/* Overview Tab */}
+              {activeTab === 'overview' && (
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="card border h-100">
+                      <div className="card-header">
+                        <h5 className="card-title mb-0">
+                          {t('userDetail.basicInformation')}
+                        </h5>
                       </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="card border h-100">
-                        <div className="card-header">
-                          <h5 className="card-title mb-0">
-                            {t('userDetail.groupInformation')}
-                          </h5>
+                      <div className="card-body">
+                        <div className="row mb-3">
+                          <div className="col-sm-4">
+                            <h6 className="mb-0">
+                              {t('userDetail.fullName')}:
+                            </h6>
+                          </div>
+                          <div className="col-sm-8">
+                            <p className="text-muted mb-0">{user?.name}</p>
+                          </div>
                         </div>
-                        <div className="card-body">
-                          {user?.role === 'student' && (
-                            <>
-                              <div className="row mb-3">
-                                <div className="col-sm-4">
-                                  <h6 className="mb-0">
-                                    {t('userDetail.assignedGroup')}:
-                                  </h6>
-                                </div>
-                                <div className="col-sm-8">
-                                  {user?.group ? (
-                                    <span className="badge bg-primary">
-                                      {user.group.name}
-                                    </span>
-                                  ) : (
-                                    <span className="text-muted">
-                                      {t('userDetail.noGroupAssigned')}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              {user?.group && (
-                                <>
-                                  <div className="row mb-3">
-                                    <div className="col-sm-4">
-                                      <h6 className="mb-0">
-                                        {t('userDetail.groupDescription')}:
-                                      </h6>
-                                    </div>
-                                    <div className="col-sm-8">
-                                      <p className="text-muted mb-0">
-                                        {user.group.description ||
-                                          t('userDetail.noDescription')}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-4">
-                                      <h6 className="mb-0">
-                                        {t('userDetail.groupSize')}:
-                                      </h6>
-                                    </div>
-                                    <div className="col-sm-8">
-                                      <p className="text-muted mb-0">
-                                        {user.group.users?.length || 0}{' '}
-                                        {t('userDetail.students')}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-                            </>
-                          )}
-                          {user?.role === 'teacher' && (
-                            <>
-                              <div className="row">
-                                <div className="col-sm-4">
-                                  <h6 className="mb-0">
-                                    {t('userDetail.assignedGroups')}:
-                                  </h6>
-                                </div>
-                                <div className="col-sm-8">
-                                  {user?.assignedGroups &&
-                                  user.assignedGroups.length > 0 ? (
-                                    <div>
-                                      {user.assignedGroups.map(group => (
-                                        <span
-                                          key={group.id}
-                                          className="badge bg-primary me-1 mb-1"
-                                        >
-                                          {group.name}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <span className="text-muted">
-                                      {t('userDetail.noGroupsAssigned')}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </>
-                          )}
-                          {user?.role === 'super_admin' && (
-                            <div className="text-center">
-                              <p className="text-muted">
-                                {t('userDetail.superAdminAccess')}
-                              </p>
-                            </div>
-                          )}
+                        <div className="row mb-3">
+                          <div className="col-sm-4">
+                            <h6 className="mb-0">{t('userDetail.email')}:</h6>
+                          </div>
+                          <div className="col-sm-8">
+                            <p className="text-muted mb-0">{user?.email}</p>
+                          </div>
+                        </div>
+                        <div className="row mb-3">
+                          <div className="col-sm-4">
+                            <h6 className="mb-0">{t('userDetail.role')}:</h6>
+                          </div>
+                          <div className="col-sm-8">
+                            {getRoleBadge(user?.role)}
+                          </div>
+                        </div>
+                        <div className="row mb-3">
+                          <div className="col-sm-4">
+                            <h6 className="mb-0">{t('userDetail.status')}:</h6>
+                          </div>
+                          <div className="col-sm-8">
+                            {getStatusBadge(user?.is_active)}
+                          </div>
+                        </div>
+                        <div className="row mb-3">
+                          <div className="col-sm-4">
+                            <h6 className="mb-0">{t('userDetail.created')}:</h6>
+                          </div>
+                          <div className="col-sm-8">
+                            <p className="text-muted mb-0">
+                              {new Date(user?.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-sm-4">
+                            <h6 className="mb-0">
+                              {t('userDetail.lastUpdated')}:
+                            </h6>
+                          </div>
+                          <div className="col-sm-8">
+                            <p className="text-muted mb-0">
+                              {new Date(user?.updated_at).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                )}
-
-                {/* Details Tab */}
-                {activeTab === 'details' && (
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="card border">
-                        <div className="card-header">
-                          <h5 className="card-title mb-0">
-                            {t('userDetail.detailedInformation')}
-                          </h5>
-                        </div>
-                        <div className="card-body">
-                          <div className="row">
-                            <div className="col-md-6">
-                              <table className="table table-borderless">
-                                <tbody>
-                                  <tr>
-                                    <td>
-                                      <strong>{t('userDetail.userId')}:</strong>
-                                    </td>
-                                    <td>{user?.id}</td>
-                                  </tr>
-                                  <tr>
-                                    <td>
-                                      <strong>
-                                        {t('userDetail.fullName')}:
-                                      </strong>
-                                    </td>
-                                    <td>{user?.name}</td>
-                                  </tr>
-                                  <tr>
-                                    <td>
-                                      <strong>
-                                        {t('userDetail.emailAddress')}:
-                                      </strong>
-                                    </td>
-                                    <td>{user?.email}</td>
-                                  </tr>
-                                  <tr>
-                                    <td>
-                                      <strong>{t('userDetail.role')}:</strong>
-                                    </td>
-                                    <td>{getRoleBadge(user?.role)}</td>
-                                  </tr>
-                                  <tr>
-                                    <td>
-                                      <strong>
-                                        {t('userDetail.accountStatus')}:
-                                      </strong>
-                                    </td>
-                                    <td>{getStatusBadge(user?.is_active)}</td>
-                                  </tr>
-                                </tbody>
-                              </table>
+                  <div className="col-md-6">
+                    <div className="card border h-100">
+                      <div className="card-header">
+                        <h5 className="card-title mb-0">
+                          {t('userDetail.groupInformation')}
+                        </h5>
+                      </div>
+                      <div className="card-body">
+                        {user?.role === 'student' && (
+                          <>
+                            <div className="row mb-3">
+                              <div className="col-sm-4">
+                                <h6 className="mb-0">
+                                  {t('userDetail.assignedGroup')}:
+                                </h6>
+                              </div>
+                              <div className="col-sm-8">
+                                {user?.group ? (
+                                  <span className="badge bg-primary">
+                                    {user.group.name}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted">
+                                    {t('userDetail.noGroupAssigned')}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <div className="col-md-6">
-                              <table className="table table-borderless">
-                                <tbody>
+                            {user?.group && (
+                              <>
+                                <div className="row mb-3">
+                                  <div className="col-sm-4">
+                                    <h6 className="mb-0">
+                                      {t('userDetail.groupDescription')}:
+                                    </h6>
+                                  </div>
+                                  <div className="col-sm-8">
+                                    <p className="text-muted mb-0">
+                                      {user.group.description ||
+                                        t('userDetail.noDescription')}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="row">
+                                  <div className="col-sm-4">
+                                    <h6 className="mb-0">
+                                      {t('userDetail.groupSize')}:
+                                    </h6>
+                                  </div>
+                                  <div className="col-sm-8">
+                                    <p className="text-muted mb-0">
+                                      {user.group.users?.length || 0}{' '}
+                                      {t('userDetail.students')}
+                                    </p>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </>
+                        )}
+                        {user?.role === 'teacher' && (
+                          <>
+                            <div className="row">
+                              <div className="col-sm-4">
+                                <h6 className="mb-0">
+                                  {t('userDetail.assignedGroups')}:
+                                </h6>
+                              </div>
+                              <div className="col-sm-8">
+                                {user?.assignedGroups &&
+                                user.assignedGroups.length > 0 ? (
+                                  <div>
+                                    {user.assignedGroups.map(group => (
+                                      <span
+                                        key={group.id}
+                                        className="badge bg-primary me-1 mb-1"
+                                      >
+                                        {group.name}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted">
+                                    {t('userDetail.noGroupsAssigned')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {user?.role === 'super_admin' && (
+                          <div className="text-center">
+                            <p className="text-muted">
+                              {t('userDetail.superAdminAccess')}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Details Tab */}
+              {activeTab === 'details' && (
+                <div className="row">
+                  <div className="col-12">
+                    <div className="card border">
+                      <div className="card-header">
+                        <h5 className="card-title mb-0">
+                          {t('userDetail.detailedInformation')}
+                        </h5>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-md-6">
+                            <table className="table table-borderless">
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <strong>{t('userDetail.userId')}:</strong>
+                                  </td>
+                                  <td>{user?.id}</td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <strong>{t('userDetail.fullName')}:</strong>
+                                  </td>
+                                  <td>{user?.name}</td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <strong>
+                                      {t('userDetail.emailAddress')}:
+                                    </strong>
+                                  </td>
+                                  <td>{user?.email}</td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <strong>{t('userDetail.role')}:</strong>
+                                  </td>
+                                  <td>{getRoleBadge(user?.role)}</td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <strong>
+                                      {t('userDetail.accountStatus')}:
+                                    </strong>
+                                  </td>
+                                  <td>{getStatusBadge(user?.is_active)}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <div className="col-md-6">
+                            <table className="table table-borderless">
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <strong>
+                                      {t('userDetail.createdDate')}:
+                                    </strong>
+                                  </td>
+                                  <td>
+                                    {new Date(
+                                      user?.created_at
+                                    ).toLocaleString()}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <strong>
+                                      {t('userDetail.lastUpdated')}:
+                                    </strong>
+                                  </td>
+                                  <td>
+                                    {new Date(
+                                      user?.updated_at
+                                    ).toLocaleString()}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <strong>{t('userDetail.groupId')}:</strong>
+                                  </td>
+                                  <td>
+                                    {user?.group_id ||
+                                      t('userDetail.notAssigned')}
+                                  </td>
+                                </tr>
+                                {user?.role === 'student' && user?.group && (
                                   <tr>
                                     <td>
                                       <strong>
-                                        {t('userDetail.createdDate')}:
+                                        {t('userDetail.groupName')}:
                                       </strong>
                                     </td>
-                                    <td>
-                                      {new Date(
-                                        user?.created_at
-                                      ).toLocaleString()}
-                                    </td>
+                                    <td>{user.group.name}</td>
                                   </tr>
-                                  <tr>
-                                    <td>
-                                      <strong>
-                                        {t('userDetail.lastUpdated')}:
-                                      </strong>
-                                    </td>
-                                    <td>
-                                      {new Date(
-                                        user?.updated_at
-                                      ).toLocaleString()}
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>
-                                      <strong>
-                                        {t('userDetail.groupId')}:
-                                      </strong>
-                                    </td>
-                                    <td>
-                                      {user?.group_id ||
-                                        t('userDetail.notAssigned')}
-                                    </td>
-                                  </tr>
-                                  {user?.role === 'student' && user?.group && (
+                                )}
+                                {user?.role === 'teacher' &&
+                                  user?.assignedGroups && (
                                     <tr>
                                       <td>
                                         <strong>
-                                          {t('userDetail.groupName')}:
+                                          {t('userDetail.assignedGroups')}:
                                         </strong>
                                       </td>
-                                      <td>{user.group.name}</td>
+                                      <td>
+                                        {user.assignedGroups.length}{' '}
+                                        {t('userDetail.groups')}
+                                      </td>
                                     </tr>
                                   )}
-                                  {user?.role === 'teacher' &&
-                                    user?.assignedGroups && (
-                                      <tr>
-                                        <td>
-                                          <strong>
-                                            {t('userDetail.assignedGroups')}:
-                                          </strong>
-                                        </td>
-                                        <td>
-                                          {user.assignedGroups.length}{' '}
-                                          {t('userDetail.groups')}
-                                        </td>
-                                      </tr>
-                                    )}
-                                </tbody>
-                              </table>
-                            </div>
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Diary Activity Tab */}
-                {activeTab === 'diary' && user?.role === 'student' && (
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="card border">
-                        <div className="card-header">
-                          <h5 className="card-title mb-0">
-                            {t('userDetail.diaryActivityStatistics')}
-                          </h5>
-                        </div>
-                        <div className="card-body">
-                          {diaryStats ? (
-                            <div className="row">
-                              <div className="col-md-3">
-                                <div className="card bg-primary text-white">
-                                  <div className="card-body text-center">
-                                    <h3 className="card-title text-white">
-                                      {diaryStats.totalEntries}
-                                    </h3>
-                                    <p className="card-text">
-                                      {t('userDetail.totalEntries')}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-md-3">
-                                <div className="card bg-success text-white">
-                                  <div className="card-body text-center">
-                                    <h3 className="card-title text-white">
-                                      {diaryStats.submittedEntries}
-                                    </h3>
-                                    <p className="card-text">
-                                      {t('userDetail.submittedEntries')}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-md-3">
-                                <div className="card bg-info text-white">
-                                  <div className="card-body text-center">
-                                    <h3 className="card-title text-white">
-                                      {diaryStats.reviewedEntries}
-                                    </h3>
-                                    <p className="card-text">
-                                      {t('userDetail.reviewedEntries')}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-md-3">
-                                <div className="card bg-warning text-white">
-                                  <div className="card-body text-center">
-                                    <h3 className="card-title text-white">
-                                      {diaryStats.averageRating.toFixed(1)}
-                                    </h3>
-                                    <p className="card-text">
-                                      {t('userDetail.averageRating')}
-                                    </p>
-                                  </div>
+              {/* Diary Activity Tab */}
+              {activeTab === 'diary' && user?.role === 'student' && (
+                <div className="row">
+                  <div className="col-12">
+                    <div className="card border">
+                      <div className="card-header">
+                        <h5 className="card-title mb-0">
+                          {t('userDetail.diaryActivityStatistics')}
+                        </h5>
+                      </div>
+                      <div className="card-body">
+                        {diaryStats ? (
+                          <div className="row">
+                            <div className="col-md-3">
+                              <div className="card bg-primary text-white">
+                                <div className="card-body text-center">
+                                  <h3 className="card-title text-white">
+                                    {diaryStats.totalEntries}
+                                  </h3>
+                                  <p className="card-text">
+                                    {t('userDetail.totalEntries')}
+                                  </p>
                                 </div>
                               </div>
                             </div>
-                          ) : (
-                            <div className="text-center">
-                              <div className="spinner-border" role="status">
-                                <span className="visually-hidden">
-                                  {t('common.loading')}
-                                </span>
+                            <div className="col-md-3">
+                              <div className="card bg-success text-white">
+                                <div className="card-body text-center">
+                                  <h3 className="card-title text-white">
+                                    {diaryStats.submittedEntries}
+                                  </h3>
+                                  <p className="card-text">
+                                    {t('userDetail.submittedEntries')}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          )}
-                        </div>
+                            <div className="col-md-3">
+                              <div className="card bg-info text-white">
+                                <div className="card-body text-center">
+                                  <h3 className="card-title text-white">
+                                    {diaryStats.reviewedEntries}
+                                  </h3>
+                                  <p className="card-text">
+                                    {t('userDetail.reviewedEntries')}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-3">
+                              <div className="card bg-warning text-white">
+                                <div className="card-body text-center">
+                                  <h3 className="card-title text-white">
+                                    {diaryStats.averageRating.toFixed(1)}
+                                  </h3>
+                                  <p className="card-text">
+                                    {t('userDetail.averageRating')}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <div className="spinner-border" role="status">
+                              <span className="visually-hidden">
+                                {t('common.loading')}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Notifications Tab */}
-                {activeTab === 'notifications' && (
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="card border">
-                        <div className="card-header">
-                          <h5 className="card-title mb-0">
-                            {t('userDetail.recentNotifications')}
-                          </h5>
-                        </div>
-                        <div className="card-body">
-                          {notifications.length > 0 ? (
-                            <div className="list-group">
-                              {notifications.map(notification => (
-                                <div
-                                  key={notification.id}
-                                  className={`list-group-item ${
-                                    notification.is_read
-                                      ? 'list-group-item-light'
-                                      : 'list-group-item-primary'
-                                  }`}
-                                >
-                                  <div className="d-flex w-100 justify-content-between">
-                                    <h6 className="mb-1">
-                                      {notification.title}
-                                    </h6>
-                                    <small>
-                                      {new Date(
-                                        notification.created_at
-                                      ).toLocaleDateString()}
-                                    </small>
-                                  </div>
-                                  <p className="mb-1">{notification.message}</p>
+              {/* Notifications Tab */}
+              {activeTab === 'notifications' && (
+                <div className="row">
+                  <div className="col-12">
+                    <div className="card border">
+                      <div className="card-header">
+                        <h5 className="card-title mb-0">
+                          {t('userDetail.recentNotifications')}
+                        </h5>
+                      </div>
+                      <div className="card-body">
+                        {notifications.length > 0 ? (
+                          <div className="list-group">
+                            {notifications.map(notification => (
+                              <div
+                                key={notification.id}
+                                className={`list-group-item ${
+                                  notification.is_read
+                                    ? 'list-group-item-light'
+                                    : 'list-group-item-primary'
+                                }`}
+                              >
+                                <div className="d-flex w-100 justify-content-between">
+                                  <h6 className="mb-1">{notification.title}</h6>
                                   <small>
-                                    <span
-                                      className={`badge ${
-                                        notification.is_read
-                                          ? 'bg-secondary'
-                                          : 'bg-primary'
-                                      }`}
-                                    >
-                                      {notification.is_read
-                                        ? t('userDetail.read')
-                                        : t('userDetail.unread')}
-                                    </span>
+                                    {new Date(
+                                      notification.created_at
+                                    ).toLocaleDateString()}
                                   </small>
                                 </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center">
-                              <p className="text-muted">
-                                {t('userDetail.noRecentNotifications')}
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                                <p className="mb-1">{notification.message}</p>
+                                <small>
+                                  <span
+                                    className={`badge ${
+                                      notification.is_read
+                                        ? 'bg-secondary'
+                                        : 'bg-primary'
+                                    }`}
+                                  >
+                                    {notification.is_read
+                                      ? t('userDetail.read')
+                                      : t('userDetail.unread')}
+                                  </span>
+                                </small>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <p className="text-muted">
+                              {t('userDetail.noRecentNotifications')}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Edit User Modal */}
-        {showEditModal && (
-          <div
-            className="modal fade show"
-            style={{ display: 'block' }}
-            tabIndex="-1"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">{t('userDetail.updateUser')}</h5>
+      {/* Edit User Modal */}
+      {showEditModal && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block' }}
+          tabIndex="-1"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{t('userDetail.updateUser')}</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowEditModal(false)}
+                ></button>
+              </div>
+              <form onSubmit={handleUpdateUser}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">{t('user.name')} *</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">{t('user.email')} *</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">{t('user.role')} *</label>
+                    <select
+                      className="form-select"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="student">{t('user.student')}</option>
+                      <option value="teacher">{t('user.teacher')}</option>
+                      <option value="super_admin">
+                        {t('user.superAdmin')}
+                      </option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        name="is_active"
+                        checked={formData.is_active}
+                        onChange={handleInputChange}
+                      />
+                      <label className="form-check-label">
+                        {t('user.active')}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
                   <button
                     type="button"
-                    className="btn-close"
+                    className="btn btn-outline-secondary"
                     onClick={() => setShowEditModal(false)}
-                  ></button>
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {t('userDetail.updateUser')}
+                  </button>
                 </div>
-                <form onSubmit={handleUpdateUser}>
-                  <div className="modal-body">
-                    <div className="mb-3">
-                      <label className="form-label">{t('user.name')} *</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">{t('user.email')} *</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">{t('user.role')} *</label>
-                      <select
-                        className="form-select"
-                        name="role"
-                        value={formData.role}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="student">{t('user.student')}</option>
-                        <option value="teacher">{t('user.teacher')}</option>
-                        <option value="super_admin">
-                          {t('user.superAdmin')}
-                        </option>
-                      </select>
-                    </div>
-                    <div className="mb-3">
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          name="is_active"
-                          checked={formData.is_active}
-                          onChange={handleInputChange}
-                        />
-                        <label className="form-check-label">
-                          {t('user.active')}
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setShowEditModal(false)}
-                    >
-                      {t('common.cancel')}
-                    </button>
-                    <button type="submit" className="btn btn-primary">
-                      {t('userDetail.updateUser')}
-                    </button>
-                  </div>
-                </form>
-              </div>
+              </form>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {showEditModal && <div className="modal-backdrop fade show"></div>}
-      </div>
-    </Layout>
+      {showEditModal && <div className="modal-backdrop fade show"></div>}
+    </div>
   );
 };
 
