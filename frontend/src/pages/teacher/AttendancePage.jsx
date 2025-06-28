@@ -28,7 +28,7 @@ const AttendancePage = () => {
 
   const fetchGroups = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/groups`, {
+      const res = await fetch(`${API_BASE_URL}/groups`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -45,7 +45,7 @@ const AttendancePage = () => {
     const dateStr = date.toISOString().split('T')[0];
     try {
       const res = await fetch(
-        `${API_BASE_URL}/api/attendance/group/${selectedGroup}?date=${dateStr}`,
+        `${API_BASE_URL}/attendance/group/${selectedGroup}?date=${dateStr}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.ok) {
@@ -74,7 +74,7 @@ const AttendancePage = () => {
     const dateStr = date.toISOString().split('T')[0];
     const records = students.map(s => ({ student_id: s.id, status: s.status }));
     try {
-      const res = await fetch(`${API_BASE_URL}/api/attendance`, {
+      const res = await fetch(`${API_BASE_URL}/attendance`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

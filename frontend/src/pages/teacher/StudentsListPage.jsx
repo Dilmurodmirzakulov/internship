@@ -18,7 +18,7 @@ const StudentsListPage = () => {
   const fetchStudents = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`${API_BASE_URL}/api/users/students`, {
+      const response = await fetch(`${API_BASE_URL}/users/students`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

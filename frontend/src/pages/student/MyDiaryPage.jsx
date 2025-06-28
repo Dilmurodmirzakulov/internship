@@ -24,7 +24,7 @@ const MyDiaryPage = () => {
     try {
       setLoading(true);
       const { token } = useAuthStore.getState();
-      const response = await fetch(`${API_BASE_URL}/api/diary/my-entries`, {
+      const response = await fetch(`${API_BASE_URL}/diary/my-entries`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -47,7 +47,7 @@ const MyDiaryPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const response = await fetch(
-        `${API_BASE_URL}/api/diary/program-dates/${user.group_id}`,
+        `${API_BASE_URL}/diary/program-dates/${user.group_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

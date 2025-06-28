@@ -36,9 +36,7 @@ interface AuthState {
   updateUser: (user: User) => void;
 }
 
-const API_BASE_URL =
-  (import.meta as any).env.VITE_API_URL ||
-  'https://techamal-production.up.railway.app/api';
+import API_BASE_URL from '../config/api';
 
 console.log('AuthStore: API_BASE_URL is set to:', API_BASE_URL);
 

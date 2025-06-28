@@ -24,12 +24,18 @@ const ReportsPage = () => {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const { token } = useAuthStore.getState();
+
+      if (!token) {
+        setError('Authentication token not found');
+        setLoading(false);
+        return;
+      }
 
       // Try to use the comprehensive analytics endpoint first
       try {
         const analyticsResponse = await fetch(
-          `${API_BASE_URL}/api/users/admin/analytics?timeframe=${selectedTimeframe}`,
+          `${API_BASE_URL}/users/admin/analytics?timeframe=${selectedTimeframe}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -58,19 +64,19 @@ const ReportsPage = () => {
       // Fallback to individual endpoints if comprehensive endpoint fails
       const [overviewRes, usersRes, diaryAnalyticsRes, programsRes] =
         await Promise.all([
-          fetch(`${API_BASE_URL}/api/diary/overview`, {
+          fetch(`${API_BASE_URL}/diary/overview`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch(`${API_BASE_URL}/api/users`, {
+          fetch(`${API_BASE_URL}/users`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(
-            `${API_BASE_URL}/api/diary/analytics?timeframe=${selectedTimeframe}`,
+            `${API_BASE_URL}/diary/analytics?timeframe=${selectedTimeframe}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           ),
-          fetch(`${API_BASE_URL}/api/programs`, {
+          fetch(`${API_BASE_URL}/programs`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

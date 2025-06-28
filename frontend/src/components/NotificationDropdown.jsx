@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { useUIStore } from '../store/uiStore';
 import { Link } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
 
 const NotificationDropdown = () => {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [stats, setStats] = useState({ total: 0, unread: 0 });
   const [isOpen, setIsOpen] = useState(false);
@@ -32,10 +34,10 @@ const NotificationDropdown = () => {
     setLoading(true);
     try {
       const [notificationsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/notifications?limit=10`, {
+        fetch(`${API_BASE_URL}/notifications?limit=10`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE_URL}/api/notifications/stats`, {
+        fetch(`${API_BASE_URL}/notifications/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -60,7 +62,7 @@ const NotificationDropdown = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notifications/${notificationId}/read`,
+        `${API_BASE_URL}/notifications/${notificationId}/read`,
         {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` },
@@ -84,7 +86,7 @@ const NotificationDropdown = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notifications/read-all`,
+        `${API_BASE_URL}/notifications/read-all`,
         {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` },
@@ -96,7 +98,7 @@ const NotificationDropdown = () => {
         setStats(prev => ({ ...prev, unread: 0 }));
         addNotification({
           type: 'success',
-          message: 'All notifications marked as read',
+          message: t('notifications.allMarkedAsRead'),
           duration: 3000,
         });
       }
@@ -158,10 +160,10 @@ const NotificationDropdown = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (minutes < 1) return t('common.justNow');
+    if (minutes < 60) return t('common.minutesAgo', { minutes });
+    if (hours < 24) return t('common.hoursAgo', { hours });
+    if (days < 7) return t('common.daysAgo', { days });
     return date.toLocaleDateString();
   };
 
@@ -200,7 +202,7 @@ const NotificationDropdown = () => {
           style={{ width: '350px', maxHeight: '500px' }}
         >
           <div className="dropdown-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Notifications</h6>
+            <h6 className="mb-0">{t('common.notifications')}</h6>
             {stats.unread > 0 && (
               <button
                 className="btn btn-sm btn-outline-primary"
@@ -221,7 +223,7 @@ const NotificationDropdown = () => {
           ) : notifications.length === 0 ? (
             <div className="dropdown-item text-center text-muted">
               <i className="bx bx-bell-off fs-1 mb-2 d-block"></i>
-              No notifications
+              {t('notifications.noNotifications')}
             </div>
           ) : (
             <div className="overflow-auto" style={{ maxHeight: '400px' }}>
@@ -280,7 +282,7 @@ const NotificationDropdown = () => {
             className="dropdown-item text-center text-primary"
           >
             <i className="bx bx-show-alt me-1"></i>
-            View All Notifications
+            {t('notifications.viewAll')}
           </Link>
         </div>
       )}

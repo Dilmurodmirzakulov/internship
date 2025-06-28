@@ -63,7 +63,7 @@ const Navbar = () => {
         className="navbar-nav-right d-flex align-items-center"
         id="navbar-collapse"
       >
-        {getGreetingMessage(user?.name?.split(' ')[0] || 'User')}
+        {getGreetingMessage(user?.name?.split(' ')[0] || 'User', t)}
         <ul className="navbar-nav flex-row align-items-center ms-auto">
           <li className="nav-item me-3">
             <LanguageSwitcher />

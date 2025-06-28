@@ -41,7 +41,7 @@ export const ResetPasswordPage = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/auth/reset-password-token`,
+        `${API_BASE_URL}/auth/reset-password-token`,
         {
           method: 'POST',
           headers: {

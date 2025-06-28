@@ -38,7 +38,7 @@ const NotificationManagementPage = () => {
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/notifications/stats`, {
+      const response = await fetch(`${API_BASE_URL}/notifications/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -55,7 +55,7 @@ const NotificationManagementPage = () => {
   const sendAnnouncement = async (values, { setSubmitting, resetForm }) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notifications/announcement`,
+        `${API_BASE_URL}/notifications/announcement`,
         {
           method: 'POST',
           headers: {
@@ -99,7 +99,7 @@ const NotificationManagementPage = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notifications/diary-reminders`,
+        `${API_BASE_URL}/notifications/diary-reminders`,
         {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
@@ -137,7 +137,7 @@ const NotificationManagementPage = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notifications/cleanup`,
+        `${API_BASE_URL}/notifications/cleanup`,
         {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },

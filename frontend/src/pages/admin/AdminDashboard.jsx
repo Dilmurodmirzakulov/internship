@@ -31,7 +31,7 @@ const AdminDashboard = () => {
       // Try comprehensive analytics endpoint first
       try {
         const analyticsResponse = await fetch(
-          `${API_BASE_URL}/api/users/admin/analytics?timeframe=30`,
+          `${API_BASE_URL}/users/admin/analytics?timeframe=30`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -41,7 +41,7 @@ const AdminDashboard = () => {
           const analyticsData = await analyticsResponse.json();
 
           // Also fetch groups for the complete dashboard
-          const groupsResponse = await fetch(`${API_BASE_URL}/api/groups`, {
+          const groupsResponse = await fetch(`${API_BASE_URL}/groups`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -69,15 +69,15 @@ const AdminDashboard = () => {
       }
 
       // Fallback to individual endpoints
-      const usersResponse = await fetch(`${API_BASE_URL}/api/users?limit=100`, {
+      const usersResponse = await fetch(`${API_BASE_URL}/users?limit=100`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const groupsResponse = await fetch(`${API_BASE_URL}/api/groups`, {
+      const groupsResponse = await fetch(`${API_BASE_URL}/groups`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const programsResponse = await fetch(`${API_BASE_URL}/api/programs`, {
+      const programsResponse = await fetch(`${API_BASE_URL}/programs`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

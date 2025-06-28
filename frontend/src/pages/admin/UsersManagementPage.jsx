@@ -58,7 +58,7 @@ const UsersManagementPage = () => {
         ...(filters.search && { search: filters.search }),
       });
 
-      const response = await fetch(`${API_BASE_URL}/api/users?${queryParams}`, {
+      const response = await fetch(`${API_BASE_URL}/users?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -85,7 +85,7 @@ const UsersManagementPage = () => {
   const fetchGroups = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`${API_BASE_URL}/api/groups`, {
+      const response = await fetch(`${API_BASE_URL}/groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -146,8 +146,8 @@ const UsersManagementPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const url = editingUser
-        ? `${API_BASE_URL}/api/users/${editingUser.id}`
-        : `${API_BASE_URL}/api/users`;
+        ? `${API_BASE_URL}/users/${editingUser.id}`
+        : `${API_BASE_URL}/users`;
       const method = editingUser ? 'PUT' : 'POST';
 
       const submitData = { ...formData };
@@ -214,7 +214,7 @@ const UsersManagementPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const response = await fetch(
-        `${API_BASE_URL}/api/users/${userToDelete.id}`,
+        `${API_BASE_URL}/users/${userToDelete.id}`,
         {
           method: 'DELETE',
           headers: {

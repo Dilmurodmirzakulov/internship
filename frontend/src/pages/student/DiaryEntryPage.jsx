@@ -36,7 +36,7 @@ const DiaryEntryPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const response = await fetch(
-        `${API_BASE_URL}/api/diary/program-dates/${user.group_id}`,
+        `${API_BASE_URL}/diary/program-dates/${user.group_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -57,7 +57,7 @@ const DiaryEntryPage = () => {
   const fetchExistingEntry = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`${API_BASE_URL}/api/diary/entry/${date}`, {
+      const response = await fetch(`${API_BASE_URL}/diary/entry/${date}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -135,8 +135,8 @@ const DiaryEntryPage = () => {
       }
 
       const url = isEditing
-        ? `${API_BASE_URL}/api/diary/entry/${existingEntry.id}`
-        : `${API_BASE_URL}/api/diary/entry`;
+        ? `${API_BASE_URL}/diary/entry/${existingEntry.id}`
+        : `${API_BASE_URL}/diary/entry`;
 
       const method = isEditing ? 'PUT' : 'POST';
 

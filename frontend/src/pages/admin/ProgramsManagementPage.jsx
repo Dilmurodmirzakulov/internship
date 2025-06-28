@@ -45,7 +45,7 @@ const ProgramsManagementPage = () => {
     try {
       setLoading(true);
       const { token } = useAuthStore.getState();
-      const response = await fetch(`${API_BASE_URL}/api/programs`, {
+      const response = await fetch(`${API_BASE_URL}/programs`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -67,7 +67,7 @@ const ProgramsManagementPage = () => {
   const fetchGroups = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`${API_BASE_URL}/api/groups`, {
+      const response = await fetch(`${API_BASE_URL}/groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -123,8 +123,8 @@ const ProgramsManagementPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const url = editingProgram
-        ? `${API_BASE_URL}/api/programs/${editingProgram.id}`
-        : `${API_BASE_URL}/api/programs`;
+        ? `${API_BASE_URL}/programs/${editingProgram.id}`
+        : `${API_BASE_URL}/programs`;
       const method = editingProgram ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -184,7 +184,7 @@ const ProgramsManagementPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const response = await fetch(
-        `${API_BASE_URL}/api/programs/${programId}`,
+        `${API_BASE_URL}/programs/${programId}`,
         {
           method: 'DELETE',
           headers: {

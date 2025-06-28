@@ -1,20 +1,23 @@
 // greetingHandler.js
 
-const getGreetingMessage = (name) => {
-    const currentTime = new Date();
-    const currentHour = currentTime.getHours();
+const getGreetingMessage = (name, t) => {
+  const currentTime = new Date();
+  const currentHour = currentTime.getHours();
 
-    let greeting;
+  let greetingKey;
 
-    if (currentHour >= 5 && currentHour < 12) {
-        greeting = 'Good Morning 😎';
-    } else if (currentHour >= 12 && currentHour < 18) {
-        greeting = 'Good Afternoon 🌤️';
-    } else {
-        greeting = 'Good Evening 🌙';
-    }
+  if (currentHour >= 5 && currentHour < 12) {
+    greetingKey = 'common.greetings.goodMorning';
+  } else if (currentHour >= 12 && currentHour < 18) {
+    greetingKey = 'common.greetings.goodAfternoon';
+  } else {
+    greetingKey = 'common.greetings.goodEvening';
+  }
 
-    return `👋 Hello ${name}, ${greeting}!`;
+  return t('common.greetings.hello', {
+    name: name,
+    greeting: t(greetingKey),
+  });
 };
 
 export default getGreetingMessage;

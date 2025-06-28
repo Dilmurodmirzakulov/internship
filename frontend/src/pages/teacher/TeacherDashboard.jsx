@@ -22,7 +22,7 @@ const TeacherDashboard = () => {
 
       // Use the optimized dashboard endpoint
       const dashboardResponse = await fetch(
-        `${API_BASE_URL}/api/users/teacher/dashboard`,
+        `${API_BASE_URL}/users/teacher/dashboard`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

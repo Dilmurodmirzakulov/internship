@@ -34,10 +34,10 @@ const NotificationsPage = () => {
       });
 
       const [notificationsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/notifications?${params}`, {
+        fetch(`${API_BASE_URL}/notifications?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE_URL}/api/notifications/stats`, {
+        fetch(`${API_BASE_URL}/notifications/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -82,7 +82,7 @@ const NotificationsPage = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notifications/${notificationId}/read`,
+        `${API_BASE_URL}/notifications/${notificationId}/read`,
         {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` },
@@ -106,7 +106,7 @@ const NotificationsPage = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notifications/read-all`,
+        `${API_BASE_URL}/notifications/read-all`,
         {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` },
