@@ -1,12 +1,13 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React from 'react';
 
 export const Blank = ({ children }) => {
-    return (
-        <>
-            <Link aria-label='Go to Home Page' to="/">
-                {children}
-            </Link>
-        </>
-    )
-}
+  return (
+    <div className="layout-wrapper layout-content-navbar layout-without-menu">
+      <div className="layout-container">
+        <div className="layout-page">
+          <div className="content-wrapper">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+};

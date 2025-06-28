@@ -49,6 +49,11 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    profile_image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: "Path to user's profile image",
+    },
   },
   {
     tableName: "users",

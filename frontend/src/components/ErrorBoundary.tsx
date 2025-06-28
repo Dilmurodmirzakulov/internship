@@ -30,7 +30,7 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="container-xxl flex-grow-1 container-p-y">
+        <div>
           <div className="row">
             <div className="col-12">
               <div className="card">

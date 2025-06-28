@@ -3,10 +3,49 @@ const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 const { User } = require("../models");
 const { auth } = require("../middleware/auth");
+const crypto = require("crypto");
 
 const router = express.Router();
 
-// Login
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Authenticate user and return JWT token
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Invalid credentials or user inactive
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   "/login",
   [
@@ -74,7 +113,37 @@ router.post(
   }
 );
 
-// Get current user
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Get current authenticated user information
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get("/me", auth, async (req, res) => {
   try {
     res.json({
@@ -86,7 +155,46 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
-// Change password (for all users)
+/**
+ * @swagger
+ * /api/auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChangePasswordRequest'
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Validation error or current password incorrect
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   "/change-password",
   auth,
@@ -168,5 +276,150 @@ router.post(
 router.post("/logout", auth, (req, res) => {
   res.json({ message: "Logout successful." });
 });
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ForgotPasswordRequest'
+ *     responses:
+ *       200:
+ *         description: Password reset link sent (if email exists)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "If an account with that email exists, we've sent a password reset link."
+ *                 resetUrl:
+ *                   type: string
+ *                   description: "Reset URL (only in development mode)"
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post(
+  "/forgot-password",
+  [body("email").isEmail().normalizeEmail()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: errors.array(),
+        });
+      }
+
+      const { email } = req.body;
+
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        // Don't reveal if user exists or not for security
+        return res.json({
+          message:
+            "If an account with that email exists, we've sent a password reset link.",
+        });
+      }
+
+      // Generate password reset token
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+
+      await user.update({
+        password_reset_token: resetToken,
+        password_reset_expires: resetTokenExpiry,
+      });
+
+      // In a real application, you would send an email here
+      // For now, we'll just log the reset link
+      const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password/${resetToken}`;
+
+      console.log("\n🔐 PASSWORD RESET REQUEST");
+      console.log(`User: ${user.name} (${user.email})`);
+      console.log(`Reset URL: ${resetUrl}`);
+      console.log(`Token expires: ${resetTokenExpiry.toLocaleString()}`);
+      console.log("Copy this URL to reset the password\n");
+
+      res.json({
+        message:
+          "If an account with that email exists, we've sent a password reset link.",
+        // In development, include the reset URL for testing
+        ...(process.env.NODE_ENV === "development" && { resetUrl }),
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Server error." });
+    }
+  }
+);
+
+// Reset password with token
+router.post(
+  "/reset-password-token",
+  [
+    body("token").isLength({ min: 32 }),
+    body("newPassword").isLength({ min: 6 }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: errors.array(),
+        });
+      }
+
+      const { token, newPassword } = req.body;
+
+      const user = await User.findOne({
+        where: {
+          password_reset_token: token,
+          password_reset_expires: {
+            [require("sequelize").Op.gt]: new Date(),
+          },
+        },
+      });
+
+      if (!user) {
+        return res.status(400).json({
+          message: "Invalid or expired reset token.",
+        });
+      }
+
+      // Update password and clear reset token
+      await user.update({
+        password: newPassword,
+        password_reset_token: null,
+        password_reset_expires: null,
+      });
+
+      res.json({ message: "Password reset successfully." });
+    } catch (error) {
+      console.error("Reset password with token error:", error);
+      res.status(500).json({ message: "Server error." });
+    }
+  }
+);
 
 module.exports = router;

@@ -25,12 +25,14 @@
           {
             "text": "All Users",
             "available": true,
-            "link": "/admin/users"
+            "link": "/admin/users",
+            "roles": ["super_admin"]
           },
           {
             "text": "Groups",
             "available": true,
-            "link": "/admin/groups"
+            "link": "/admin/groups",
+            "roles": ["super_admin"]
           }
         ]
       },
@@ -39,6 +41,20 @@
         "icon": "bx bx-calendar",
         "available": true,
         "link": "/admin/programs",
+        "roles": ["super_admin"]
+      },
+      {
+        "text": "Notifications",
+        "icon": "bx bx-bell",
+        "available": true,
+        "link": "/admin/notifications",
+        "roles": ["super_admin"]
+      },
+      {
+        "text": "Reports",
+        "icon": "bx bx-bar-chart",
+        "available": true,
+        "link": "/admin/reports",
         "roles": ["super_admin"]
       }
     ]
@@ -53,6 +69,13 @@
         "available": true,
         "link": "/teacher/students",
         "roles": ["teacher"]
+      },
+      {
+        "text": "Student Diaries",
+        "icon": "bx bx-book",
+        "available": true,
+        "link": "/teacher/diaries",
+        "roles": ["teacher"]
       }
     ]
   },
@@ -66,6 +89,13 @@
         "available": true,
         "link": "/student/diary",
         "roles": ["student"]
+      },
+      {
+        "text": "Add Entry",
+        "icon": "bx bx-plus-circle",
+        "available": true,
+        "link": "/student/diary/new",
+        "roles": ["student"]
       }
     ]
   },
@@ -77,6 +107,13 @@
         "icon": "bx bx-user-circle",
         "available": true,
         "link": "/account",
+        "roles": ["super_admin", "teacher", "student"]
+      },
+      {
+        "text": "Notifications",
+        "icon": "bx bx-bell",
+        "available": true,
+        "link": "/notifications",
         "roles": ["super_admin", "teacher", "student"]
       }
     ]

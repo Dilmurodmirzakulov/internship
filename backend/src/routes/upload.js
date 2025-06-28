@@ -7,6 +7,50 @@ const { requireStudent } = require("../middleware/auth");
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     FileUploadResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           example: "File uploaded successfully."
+ *         file:
+ *           type: object
+ *           properties:
+ *             url:
+ *               type: string
+ *               description: URL path to access the uploaded file
+ *             name:
+ *               type: string
+ *               description: Original filename
+ *             size:
+ *               type: integer
+ *               description: File size in bytes
+ *             mimetype:
+ *               type: string
+ *               description: MIME type of the file
+ *     FileInfo:
+ *       type: object
+ *       properties:
+ *         filename:
+ *           type: string
+ *           description: Filename
+ *         size:
+ *           type: integer
+ *           description: File size in bytes
+ *         created:
+ *           type: string
+ *           format: date-time
+ *           description: File creation date
+ *         modified:
+ *           type: string
+ *           format: date-time
+ *           description: File modification date
+ */
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -62,7 +106,63 @@ const upload = multer({
   },
 });
 
-// Upload file for diary entry
+/**
+ * @swagger
+ * /api/upload/diary-file:
+ *   post:
+ *     summary: Upload a file for diary entry
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: |
+ *                   File to upload. Supported formats:
+ *                   - Images: JPEG, PNG, GIF
+ *                   - Documents: PDF, Word (.doc, .docx), Text files
+ *                   - Maximum size: 5MB
+ *     responses:
+ *       200:
+ *         description: File uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FileUploadResponse'
+ *       400:
+ *         description: No file uploaded or invalid file type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized - Student only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       413:
+ *         description: File too large (max 5MB)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: File upload failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   "/diary-file",
   requireStudent,
@@ -97,7 +197,88 @@ router.post(
   }
 );
 
-// Delete uploaded file
+/**
+ * @swagger
+ * /api/upload/file/{filename}:
+ *   delete:
+ *     summary: Delete an uploaded file
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Name of the file to delete
+ *     responses:
+ *       200:
+ *         description: File deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "File deleted successfully."
+ *       401:
+ *         description: Unauthorized - Student only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: File not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: File deletion failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *   get:
+ *     summary: Get file information
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Name of the file to get info for
+ *     responses:
+ *       200:
+ *         description: File information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FileInfo'
+ *       401:
+ *         description: Unauthorized - Student only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: File not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Failed to get file info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.delete("/file/:filename", requireStudent, async (req, res) => {
   try {
     const { filename } = req.params;

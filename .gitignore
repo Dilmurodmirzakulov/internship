@@ -139,3 +139,5 @@ storybook-static
 
 # TypeScript
 *.tsbuildinfo 
+# Local Netlify folder
+.netlify

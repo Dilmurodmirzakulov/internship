@@ -1,240 +1,451 @@
-import { useLocation } from "react-router-dom";
-import { AccountWrapper } from "../../components/wrapper/AccountWrapper";
-import { useEffect } from "react";
+import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { AccountWrapper } from '../../components/wrapper/AccountWrapper';
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '../../store/authStore';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import API_BASE_URL from '../../config/api';
+
+// Validation schemas will be created inside the component to access translations
 
 export const AccountPage = () => {
-    useEffect(() => {
-        const deactivateAcc = document.querySelector('#formAccountDeactivation');
+  const { user, updateUser } = useAuthStore();
+  const { t } = useTranslation();
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
 
-        // Update/reset user image of account page
-        let accountUserImage = document.getElementById('uploadedAvatar');
-        const fileInput = document.querySelector('.account-file-input');
-        const resetFileInput = document.querySelector('.account-image-reset');
+  // Validation schemas with translations
+  const passwordSchema = Yup.object().shape({
+    currentPassword: Yup.string().required(t('forms.required')),
+    newPassword: Yup.string()
+      .min(6, t('forms.passwordTooShort'))
+      .required(t('forms.required')),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref('newPassword')], t('forms.passwordsDoNotMatch'))
+      .required(t('forms.required')),
+  });
 
-        if (accountUserImage) {
-            const resetImage = accountUserImage.src;
+  const profileSchema = Yup.object().shape({
+    name: Yup.string()
+      .min(2, t('forms.required'))
+      .max(100, t('forms.required'))
+      .required(t('forms.required')),
+    email: Yup.string()
+      .email(t('forms.invalidEmail'))
+      .required(t('forms.required')),
+  });
 
-            fileInput.onchange = () => {
-                if (fileInput.files[0]) {
-                    accountUserImage.src = window.URL.createObjectURL(fileInput.files[0]);
-                }
-            };
+  useEffect(() => {
+    // Set initial profile image preview
+    if (user?.profile_image) {
+      setProfileImagePreview(`${API_BASE_URL}/uploads/${user.profile_image}`);
+    }
+  }, [user]);
 
-            resetFileInput.onclick = () => {
-                fileInput.value = '';
-                accountUserImage.src = resetImage;
-            };
+  const handleProfileImageChange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        setError(t('forms.fileTooLarge'));
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        setError(t('forms.invalidFileType'));
+        return;
+      }
+
+      setProfileImage(file);
+      setProfileImagePreview(URL.createObjectURL(file));
+      setError('');
+    }
+  };
+
+  const handleResetImage = () => {
+    setProfileImage(null);
+    if (user?.profile_image) {
+      setProfileImagePreview(`${API_BASE_URL}/uploads/${user.profile_image}`);
+    } else {
+      setProfileImagePreview(null);
+    }
+    // Reset file input
+    const fileInput = document.getElementById('upload');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handlePasswordChange = async (values, { setSubmitting, resetForm }) => {
+    setError('');
+    setSuccess('');
+
+    try {
+      const { token } = useAuthStore.getState();
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        setSuccess('Password changed successfully!');
+        resetForm();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to change password');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleProfileUpdate = async (values, { setSubmitting }) => {
+    setError('');
+    setSuccess('');
+
+    try {
+      const { token } = useAuthStore.getState();
+      const formData = new FormData();
+
+      // Add text fields
+      formData.append('name', values.name);
+      formData.append('email', values.email);
+
+      // Add profile image if selected
+      if (profileImage) {
+        formData.append('profile_image', profileImage);
+      }
+
+      const response = await fetch('/api/users/profile/me', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuccess('Profile updated successfully!');
+
+        // Update the auth store with new user data
+        updateUser(data.user);
+
+        // Reset profile image state
+        setProfileImage(null);
+
+        // Update preview with new image
+        if (data.user.profile_image) {
+          setProfileImagePreview(
+            `${API_BASE_URL}/uploads/${data.user.profile_image}`
+          );
         }
-    }, []);
-    return (
-        <AccountWrapper title="Account" >
-            <>
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-                <div className="card mb-4">
-                    <h5 className="card-header">Profile Details</h5>
-                    <div className="card-body">
-                        <div className="d-flex align-items-start align-items-sm-center gap-4">
-                            <img
-                                src="../assets/img/avatars/1.png"
-                                alt="user-avatar"
-                                className="d-block rounded"
-                                height="100"
-                                width="100"
-                                aria-label="Account image"
-                                id="uploadedAvatar"
-                            />
-                            <div className="button-wrapper">
-                                <label htmlFor="upload" className="btn btn-primary me-2 mb-4" tabIndex="0">
-                                    <span className="d-none d-sm-block">Upload new photo</span>
-                                    <i className="bx bx-upload d-block d-sm-none"></i>
-                                    <input
-                                        type="file"
-                                        id="upload"
-                                        className="account-file-input"
-                                        hidden
-                                        accept="image/png, image/jpeg"
-                                    />
-                                </label>
-                                <button aria-label='Click me' type="button" className="btn btn-outline-secondary account-image-reset mb-4">
-                                    <i className="bx bx-reset d-block d-sm-none"></i>
-                                    <span className="d-none d-sm-block">Reset</span>
-                                </button>
-                                <p className="text-muted mb-0">Allowed JPG, GIF or PNG. Max size of 800K</p>
-                            </div>
-                        </div>
+  return (
+    <AccountWrapper title={t('account.profile')}>
+      <>
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="alert alert-success" role="alert">
+            {success}
+          </div>
+        )}
+
+        <div className="card mb-4">
+          <h5 className="card-header">{t('account.profileDetails')}</h5>
+          <div className="card-body">
+            <div className="d-flex align-items-start align-items-sm-center gap-4">
+              <img
+                src={profileImagePreview || '../assets/img/avatars/1.png'}
+                alt="user-avatar"
+                className="d-block rounded"
+                height="100"
+                width="100"
+                aria-label="Account image"
+              />
+              <div className="button-wrapper">
+                <label
+                  htmlFor="upload"
+                  className="btn btn-primary me-2 mb-4"
+                  tabIndex="0"
+                >
+                  <span className="d-none d-sm-block">
+                    {t('user.uploadPhoto')}
+                  </span>
+                  <i className="bx bx-upload d-block d-sm-none"></i>
+                  <input
+                    type="file"
+                    id="upload"
+                    className="account-file-input"
+                    hidden
+                    accept="image/png, image/jpeg"
+                    onChange={handleProfileImageChange}
+                  />
+                </label>
+                <button
+                  aria-label="Click me"
+                  type="button"
+                  className="btn btn-outline-secondary account-image-reset mb-4"
+                  onClick={handleResetImage}
+                >
+                  <i className="bx bx-reset d-block d-sm-none"></i>
+                  <span className="d-none d-sm-block">
+                    {t('account.reset')}
+                  </span>
+                </button>
+                <p className="text-muted mb-0">{t('user.allowedFormats')}</p>
+              </div>
+            </div>
+          </div>
+          <hr className="my-0" />
+          <div className="card-body">
+            <Formik
+              initialValues={{
+                name: user?.name || '',
+                email: user?.email || '',
+              }}
+              validationSchema={profileSchema}
+              onSubmit={handleProfileUpdate}
+              enableReinitialize={true}
+            >
+              {({ isSubmitting }) => (
+                <Form>
+                  <div className="row">
+                    <div className="mb-3 col-md-6">
+                      <label htmlFor="name" className="form-label">
+                        {t('user.fullName')}
+                      </label>
+                      <Field
+                        className="form-control"
+                        type="text"
+                        name="name"
+                        placeholder={t('user.fullName')}
+                      />
+                      <ErrorMessage
+                        name="name"
+                        component="div"
+                        className="text-danger small mt-1"
+                      />
                     </div>
-                    <hr className="my-0" />
-                    <div className="card-body">
-                        <form id="formAccountSettings" method="POST" onSubmit="return false">
-                            <div className="row">
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="firstName" className="form-label">First Name</label>
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        id="firstName"
-                                        name="firstName"
-                                        value="John"
-                                        autoFocus />
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="lastName" className="form-label">Last Name</label>
-                                    <input className="form-control" type="text" name="lastName" id="lastName" value="Doe" />
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="email" className="form-label">E-mail</label>
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        id="email"
-                                        name="email"
-                                        value="john.doe@example.com"
-                                        placeholder="john.doe@example.com" />
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="organization" className="form-label">Organization</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="organization"
-                                        name="organization"
-                                        value="ThemeSelection" />
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label className="form-label" htmlFor="phoneNumber">Phone Number</label>
-                                    <div className="input-group input-group-merge">
-                                        <span className="input-group-text">US (+1)</span>
-                                        <input
-                                            type="text"
-                                            id="phoneNumber"
-                                            name="phoneNumber"
-                                            className="form-control"
-                                            placeholder="202 555 0111" />
-                                    </div>
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="address" className="form-label">Address</label>
-                                    <input type="text" className="form-control" id="address" name="address" placeholder="Address" />
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="state" className="form-label">State</label>
-                                    <input className="form-control" type="text" id="state" name="state" placeholder="CalihtmlFornia" />
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="zipCode" className="form-label">Zip Code</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="zipCode"
-                                        name="zipCode"
-                                        placeholder="231465"
-                                        maxLength="6" />
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label className="form-label" htmlFor="country">Country</label>
-                                    <select id="country" className="select2 form-select">
-                                        <option value="">Select</option>
-                                        <option value="Australia">Australia</option>
-                                        <option value="Bangladesh">Bangladesh</option>
-                                        <option value="Belarus">Belarus</option>
-                                        <option value="Brazil">Brazil</option>
-                                        <option value="Canada">Canada</option>
-                                        <option value="China">China</option>
-                                        <option value="France">France</option>
-                                        <option value="Germany">Germany</option>
-                                        <option value="India">India</option>
-                                        <option value="Indonesia">Indonesia</option>
-                                        <option value="Israel">Israel</option>
-                                        <option value="Italy">Italy</option>
-                                        <option value="Japan">Japan</option>
-                                        <option value="Korea">Korea, Republic of</option>
-                                        <option value="Mexico">Mexico</option>
-                                        <option value="Philippines">Philippines</option>
-                                        <option value="Russia">Russian Federation</option>
-                                        <option value="South Africa">South Africa</option>
-                                        <option value="Thailand">Thailand</option>
-                                        <option value="Turkey">Turkey</option>
-                                        <option value="Ukraine">Ukraine</option>
-                                        <option value="United Arab Emirates">United Arab Emirates</option>
-                                        <option value="United Kingdom">United Kingdom</option>
-                                        <option value="United States">United States</option>
-                                    </select>
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="language" className="form-label">Language</label>
-                                    <select id="language" className="select2 form-select">
-                                        <option value="">Select Language</option>
-                                        <option value="en">English</option>
-                                        <option value="fr">French</option>
-                                        <option value="de">German</option>
-                                        <option value="pt">Portuguese</option>
-                                    </select>
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="timeZones" className="form-label">Timezone</label>
-                                    <select id="timeZones" className="select2 form-select">
-                                        <option value="">Select Timezone</option>
-                                        <option value="-12">(GMT-12:00) International Date Line West</option>
-                                        <option value="-11">(GMT-11:00) Midway Island, Samoa</option>
-                                        <option value="-10">(GMT-10:00) Hawaii</option>
-                                        <option value="-9">(GMT-09:00) Alaska</option>
-                                        <option value="-8">(GMT-08:00) Pacific Time (US & Canada)</option>
-                                        <option value="-8">(GMT-08:00) Tijuana, Baja CalihtmlFornia</option>
-                                        <option value="-7">(GMT-07:00) Arizona</option>
-                                        <option value="-7">(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>
-                                        <option value="-7">(GMT-07:00) Mountain Time (US & Canada)</option>
-                                        <option value="-6">(GMT-06:00) Central America</option>
-                                        <option value="-6">(GMT-06:00) Central Time (US & Canada)</option>
-                                        <option value="-6">(GMT-06:00) Guadalajara, Mexico City, Monterrey</option>
-                                        <option value="-6">(GMT-06:00) Saskatchewan</option>
-                                        <option value="-5">(GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
-                                        <option value="-5">(GMT-05:00) Eastern Time (US & Canada)</option>
-                                        <option value="-5">(GMT-05:00) Indiana (East)</option>
-                                        <option value="-4">(GMT-04:00) Atlantic Time (Canada)</option>
-                                        <option value="-4">(GMT-04:00) Caracas, La Paz</option>
-                                    </select>
-                                </div>
-                                <div className="mb-3 col-md-6">
-                                    <label htmlFor="currency" className="form-label">Currency</label>
-                                    <select id="currency" className="select2 form-select">
-                                        <option value="">Select Currency</option>
-                                        <option value="usd">USD</option>
-                                        <option value="euro">Euro</option>
-                                        <option value="pound">Pound</option>
-                                        <option value="bitcoin">Bitcoin</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="mt-2">
-                                <button aria-label='Click me' type="submit" className="btn btn-primary me-2">Save changes</button>
-                                <button aria-label='Click me' type="reset" className="btn btn-outline-secondary">Cancel</button>
-                            </div>
-                        </form>
+                    <div className="mb-3 col-md-6">
+                      <label htmlFor="email" className="form-label">
+                        {t('auth.email')}
+                      </label>
+                      <Field
+                        className="form-control"
+                        type="email"
+                        name="email"
+                        placeholder="john.doe@example.com"
+                      />
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-danger small mt-1"
+                      />
                     </div>
-                </div>
-                <div className="card">
-                    <h5 className="card-header">Delete Account</h5>
-                    <div className="card-body">
-                        <div className="mb-3 col-12 mb-0">
-                            <div className="alert alert-warning">
-                                <h6 className="alert-heading mb-1">Are you sure you want to delete your account?</h6>
-                                <p className="mb-0">Once you delete your account, there is no going back. Please be certain.</p>
-                            </div>
-                        </div>
-                        <form id="formAccountDeactivation" onSubmit="return false">
-                            <div className="form-check mb-3">
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    name="accountActivation"
-                                    id="accountActivation" />
-                                <label className="form-check-label" htmlFor="accountActivation">I confirm my account deactivation</label>
-                            </div>
-                            <button aria-label='Click me' type="submit" className="btn btn-danger deactivate-account">Deactivate Account</button>
-                        </form>
+                    <div className="mb-3 col-md-6">
+                      <label htmlFor="role" className="form-label">
+                        {t('user.role')}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={
+                          user?.role?.replace('_', ' ').toUpperCase() || ''
+                        }
+                        disabled
+                      />
                     </div>
-                </div>
-            </>
-        </AccountWrapper>
-    )
-}
+                    <div className="mb-3 col-md-6">
+                      <label htmlFor="group" className="form-label">
+                        {t('user.group')}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={user?.group?.name || t('user.notAssigned')}
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <button
+                      type="submit"
+                      className="btn btn-primary me-2"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting
+                        ? t('common.saving')
+                        : t('common.saveChanges')}
+                    </button>
+                    <button type="reset" className="btn btn-outline-secondary">
+                      Cancel
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        </div>
+
+        {/* Change Password Section */}
+        <div className="card mb-4">
+          <h5 className="card-header">Change Password</h5>
+          <div className="card-body">
+            <Formik
+              initialValues={{
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: '',
+              }}
+              validationSchema={passwordSchema}
+              onSubmit={handlePasswordChange}
+            >
+              {({ isSubmitting }) => (
+                <Form>
+                  <div className="row">
+                    <div className="mb-3 col-md-6">
+                      <label htmlFor="currentPassword" className="form-label">
+                        Current Password
+                      </label>
+                      <Field
+                        type="password"
+                        className="form-control"
+                        name="currentPassword"
+                        placeholder="Enter current password"
+                      />
+                      <ErrorMessage
+                        name="currentPassword"
+                        component="div"
+                        className="text-danger small mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="mb-3 col-md-6">
+                      <label htmlFor="newPassword" className="form-label">
+                        New Password
+                      </label>
+                      <Field
+                        type="password"
+                        className="form-control"
+                        name="newPassword"
+                        placeholder="Enter new password"
+                      />
+                      <ErrorMessage
+                        name="newPassword"
+                        component="div"
+                        className="text-danger small mt-1"
+                      />
+                    </div>
+                    <div className="mb-3 col-md-6">
+                      <label htmlFor="confirmPassword" className="form-label">
+                        Confirm New Password
+                      </label>
+                      <Field
+                        type="password"
+                        className="form-control"
+                        name="confirmPassword"
+                        placeholder="Confirm new password"
+                      />
+                      <ErrorMessage
+                        name="confirmPassword"
+                        component="div"
+                        className="text-danger small mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <button
+                      type="submit"
+                      className="btn btn-primary me-2"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Changing...' : 'Change Password'}
+                    </button>
+                    <button type="reset" className="btn btn-outline-secondary">
+                      Cancel
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        </div>
+
+        <div className="card">
+          <h5 className="card-header">Delete Account</h5>
+          <div className="card-body">
+            <div className="mb-3 col-12 mb-0">
+              <div className="alert alert-warning">
+                <h6 className="alert-heading mb-1">
+                  Are you sure you want to delete your account?
+                </h6>
+                <p className="mb-0">
+                  Once you delete your account, there is no going back. Please
+                  be certain.
+                </p>
+              </div>
+            </div>
+            <form
+              id="formAccountDeactivation"
+              onSubmit={e => e.preventDefault()}
+            >
+              <div className="form-check mb-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="accountActivation"
+                  id="accountActivation"
+                />
+                <label className="form-check-label" htmlFor="accountActivation">
+                  I confirm my account deactivation
+                </label>
+              </div>
+              <button
+                aria-label="Click me"
+                type="submit"
+                className="btn btn-danger deactivate-account"
+              >
+                Deactivate Account
+              </button>
+            </form>
+          </div>
+        </div>
+      </>
+    </AccountWrapper>
+  );
+};
+
+export default AccountPage;

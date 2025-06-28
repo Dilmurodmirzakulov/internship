@@ -1,9 +1,9 @@
-import React from 'react'
+import React from 'react';
 import TextDivider from '../../components/atoms/TextDivider';
 
 export const TextDividerPage = () => {
   return (
-    <div className="container-xxl flex-grow-1 container-p-y">
+    <div>
       <h4 className="py-3 mb-4">
         <span className="text-muted fw-light">Extended UI /</span> Text Divider
       </h4>
@@ -83,4 +83,3 @@ export const TextDividerPage = () => {
     </div>
   );
 };
-

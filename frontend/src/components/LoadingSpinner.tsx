@@ -20,8 +20,13 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   const spinner = (
-    <div className={`d-flex align-items-center justify-content-center ${className}`}>
-      <div className={`spinner-border text-primary ${sizeClasses[size]}`} role="status">
+    <div
+      className={`d-flex align-items-center justify-content-center ${className}`}
+    >
+      <div
+        className={`spinner-border text-primary ${sizeClasses[size]}`}
+        role="status"
+      >
         <span className="visually-hidden">{text}</span>
       </div>
       {text && <span className="ms-2">{text}</span>}
@@ -30,7 +35,10 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (fullScreen) {
     return (
-      <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75" style={{ zIndex: 9999 }}>
+      <div
+        className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75"
+        style={{ zIndex: 9999 }}
+      >
         {spinner}
       </div>
     );
@@ -39,4 +47,5 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   return spinner;
 };
 
-export default LoadingSpinner; 
+export { LoadingSpinner };
+export default LoadingSpinner;

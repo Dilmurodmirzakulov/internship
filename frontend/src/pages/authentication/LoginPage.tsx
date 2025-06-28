@@ -1,19 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import './page-auth.css';
 
-const LoginPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  });
+// Validation schema will be created inside the component to access translations
 
+// Initial form values
+const initialValues = {
+  email: '',
+  password: '',
+  rememberMe: false,
+};
+
+const LoginPage: React.FC = () => {
   const { login, isLoading, error, isAuthenticated, clearError } =
     useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  // Validation schema with translations
+  const loginSchema = Yup.object().shape({
+    email: Yup.string()
+      .email(t('forms.invalidEmail'))
+      .required(t('forms.required')),
+    password: Yup.string()
+      .min(6, t('forms.passwordTooShort'))
+      .required(t('forms.required')),
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -25,145 +42,183 @@ const LoginPage: React.FC = () => {
     clearError();
   }, [clearError]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { setSubmitting }: any
+  ) => {
+    console.log('Form submitted with:', {
+      email: values.email,
+      password: '***',
+    });
     clearError();
 
-    const success = await login(formData.email, formData.password);
-    if (success) {
-      navigate('/', { replace: true });
+    try {
+      const success = await login(values.email, values.password);
+      console.log('Login result:', success);
+
+      if (success) {
+        console.log('Login successful, navigating to dashboard');
+        navigate('/', { replace: true });
+      } else {
+        console.log('Login failed - form will not reset');
+        // Don't reset form on failure so user can try again
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const handleContainerClick = (e: React.MouseEvent) => {
+    console.log('Container clicked:', e.target);
+    // Prevent any unwanted behavior
+  };
+
   return (
-    <div className="container-xxl">
-      <div className="authentication-wrapper authentication-basic container-p-y">
-        <div className="authentication-inner">
-          <div className="card">
-            <div className="card-body">
-              <div className="app-brand justify-content-center">
-                <a href="/" className="app-brand-link gap-2">
-                  <span className="app-brand-logo demo">
-                    <i
-                      className="bx bx-book-open"
-                      style={{ fontSize: '2rem', color: '#696cff' }}
-                    ></i>
-                  </span>
-                  <span className="app-brand-text demo text-body fw-bolder">
-                    Internship Tracker
-                  </span>
-                </a>
+    <div
+      className="authentication-wrapper authentication-basic"
+      onClick={handleContainerClick}
+    >
+      <div className="authentication-inner py-4">
+        <div className="card" onClick={e => e.stopPropagation()}>
+          <div className="card-body">
+            <div className="app-brand justify-content-center">
+              <a href="/" className="app-brand-link gap-2">
+                <span className="app-brand-logo demo">
+                  <i
+                    className="bx bx-book-open"
+                    style={{ fontSize: '2rem', color: '#696cff' }}
+                  ></i>
+                </span>
+                <span className="app-brand-text demo text-body fw-bolder">
+                  {t('program.internshipProgram')}
+                </span>
+              </a>
+            </div>
+
+            <h4 className="mb-2">{t('auth.welcomeBack')} 👋</h4>
+            <p className="mb-4">{t('auth.pleaseSignIn')}</p>
+
+            {error && (
+              <div className="alert alert-danger" role="alert">
+                <div className="alert-body">{error}</div>
               </div>
+            )}
 
-              <h4 className="mb-2">Welcome! 👋</h4>
-              <p className="mb-4">
-                Please sign-in to your account and start tracking your
-                internship
-              </p>
+            <Formik
+              initialValues={initialValues}
+              validationSchema={loginSchema}
+              onSubmit={handleSubmit}
+              enableReinitialize={false}
+              validateOnChange={true}
+              validateOnBlur={false}
+            >
+              {({ isSubmitting, touched, errors, values }) => {
+                console.log('Current form values:', values);
+                return (
+                  <Form className="mb-3">
+                    <div className="mb-3">
+                      <label htmlFor="email" className="form-label">
+                        {t('auth.email')}
+                      </label>
+                      <Field
+                        type="email"
+                        name="email"
+                        className={`form-control ${
+                          touched.email && errors.email ? 'is-invalid' : ''
+                        }`}
+                        placeholder={t('auth.email')}
+                        autoFocus
+                      />
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="invalid-feedback"
+                      />
+                    </div>
 
-              {error && (
-                <div className="alert alert-danger" role="alert">
-                  <div className="alert-body">{error}</div>
-                </div>
-              )}
+                    <div className="mb-3 form-password-toggle">
+                      <div className="d-flex justify-content-between">
+                        <label className="form-label" htmlFor="password">
+                          {t('auth.password')}
+                        </label>
+                        <Link to="/auth/forgot-password">
+                          <small>{t('auth.forgotPassword')}</small>
+                        </Link>
+                      </div>
+                      <div className="input-group input-group-merge">
+                        <Field
+                          type="password"
+                          name="password"
+                          className={`form-control ${
+                            touched.password && errors.password
+                              ? 'is-invalid'
+                              : ''
+                          }`}
+                          placeholder={t('auth.password')}
+                        />
+                        <ErrorMessage
+                          name="password"
+                          component="div"
+                          className="invalid-feedback"
+                        />
+                      </div>
+                    </div>
 
-              <form onSubmit={handleSubmit} className="mb-3">
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    autoFocus
-                  />
-                </div>
+                    <div className="mb-3">
+                      <div className="form-check">
+                        <Field
+                          type="checkbox"
+                          name="rememberMe"
+                          className="form-check-input"
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="rememberMe"
+                        >
+                          {t('auth.rememberMe')}
+                        </label>
+                      </div>
+                    </div>
 
-                <div className="mb-3 form-password-toggle">
-                  <div className="d-flex justify-content-between">
-                    <label className="form-label" htmlFor="password">
-                      Password
-                    </label>
-                    <Link to="/auth/forgot-password">
-                      <small>Forgot Password?</small>
-                    </Link>
-                  </div>
-                  <div className="input-group input-group-merge">
-                    <input
-                      type="password"
-                      id="password"
-                      className="form-control"
-                      name="password"
-                      placeholder="Enter your password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
+                    <div className="mb-3">
+                      <button
+                        className="btn btn-primary d-grid w-100"
+                        type="submit"
+                        disabled={isLoading || isSubmitting}
+                      >
+                        {isLoading ? (
+                          <LoadingSpinner size="sm" />
+                        ) : (
+                          t('auth.signIn')
+                        )}
+                      </button>
+                    </div>
+                  </Form>
+                );
+              }}
+            </Formik>
 
-                <div className="mb-3">
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id="rememberMe"
-                      name="rememberMe"
-                      checked={formData.rememberMe}
-                      onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="rememberMe">
-                      Remember Me
-                    </label>
-                  </div>
-                </div>
+            <div className="text-center">
+              <small className="text-muted">
+                Need help? Contact your administrator or teacher.
+              </small>
+            </div>
 
-                <div className="mb-3">
-                  <button
-                    className="btn btn-primary d-grid w-100"
-                    type="submit"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? <LoadingSpinner size="sm" /> : 'Sign in'}
-                  </button>
-                </div>
-              </form>
-
-              <div className="text-center">
-                <small className="text-muted">
-                  Need help? Contact your administrator or teacher.
+            {/* Demo credentials */}
+            <div className="mt-4">
+              <div className="alert alert-info">
+                <h6>Demo Credentials:</h6>
+                <small>
+                  <strong>Super Admin:</strong> admin@university.edu / admin123
+                  <br />
+                  <strong>Teacher:</strong> john.smith@university.edu /
+                  teacher123
+                  <br />
+                  <strong>Student:</strong> alice.johnson@student.university.edu
+                  / student123
                 </small>
-              </div>
-
-              {/* Demo credentials */}
-              <div className="mt-4">
-                <div className="alert alert-info">
-                  <h6>Demo Credentials:</h6>
-                  <small>
-                    <strong>Super Admin:</strong> admin@university.edu /
-                    admin123
-                    <br />
-                    <strong>Teacher:</strong> john.smith@university.edu /
-                    teacher123
-                    <br />
-                    <strong>Student:</strong>{' '}
-                    alice.johnson@student.university.edu / student123
-                  </small>
-                </div>
               </div>
             </div>
           </div>

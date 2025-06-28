@@ -18,6 +18,7 @@ interface User {
       disabled_days: string[];
     };
   };
+  profile_image?: string;
   is_active: boolean;
   last_login?: string;
 }
@@ -36,7 +37,10 @@ interface AuthState {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  (import.meta as any).env.VITE_API_URL ||
+  'https://techamal-production.up.railway.app/api';
+
+console.log('AuthStore: API_BASE_URL is set to:', API_BASE_URL);
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -50,6 +54,11 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
 
+        console.log(
+          'AuthStore: Starting login request to:',
+          `${API_BASE_URL}/auth/login`
+        );
+
         try {
           const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
@@ -59,7 +68,10 @@ export const useAuthStore = create<AuthState>()(
             body: JSON.stringify({ email, password }),
           });
 
+          console.log('AuthStore: Response status:', response.status);
+
           const data = await response.json();
+          console.log('AuthStore: Response data:', data);
 
           if (!response.ok) {
             throw new Error(data.message || 'Login failed');
@@ -73,8 +85,10 @@ export const useAuthStore = create<AuthState>()(
             error: null,
           });
 
+          console.log('AuthStore: Login successful');
           return true;
         } catch (error) {
+          console.error('AuthStore: Login error:', error);
           set({
             error: error instanceof Error ? error.message : 'Login failed',
             isLoading: false,
@@ -84,6 +98,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // Clear token from localStorage
+        localStorage.removeItem('auth-storage');
         set({
           user: null,
           token: null,
