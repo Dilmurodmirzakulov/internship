@@ -32,10 +32,10 @@ app.use(
   })
 );
 
-// Rate limiting
+// Rate limiting - more generous for production deployment
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "development" ? 1000 : 500, // More generous limits
+  max: 1000, // Very generous limit for production deployment
   message: {
     error: "Too many requests from this IP, please try again later.",
     retryAfter: "15 minutes",
@@ -64,7 +64,12 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      // Be more permissive - allow all Netlify domains and localhost
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        origin.includes("netlify.app") ||
+        origin.includes("localhost")
+      ) {
         console.log("✅ CORS allowed for:", origin);
         callback(null, true);
       } else {
