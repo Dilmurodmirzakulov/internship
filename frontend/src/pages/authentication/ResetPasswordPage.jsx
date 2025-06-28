@@ -4,6 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import './page-auth.css';
 import { AuthWrapper } from './AuthWrapper';
+import API_BASE_URL from '../../config/api';
 
 const resetPasswordSchema = Yup.object().shape({
   newPassword: Yup.string()
@@ -39,16 +40,19 @@ export const ResetPasswordPage = () => {
     setSuccess('');
 
     try {
-      const response = await fetch('/api/auth/reset-password-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token,
-          newPassword: values.newPassword,
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/auth/reset-password-token`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token,
+            newPassword: values.newPassword,
+          }),
+        }
+      );
 
       const data = await response.json();
 

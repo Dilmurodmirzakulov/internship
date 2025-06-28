@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const UsersManagementPage = () => {
   const { t } = useTranslation();
@@ -56,7 +57,7 @@ const UsersManagementPage = () => {
         ...(filters.search && { search: filters.search }),
       });
 
-      const response = await fetch(`/api/users?${queryParams}`, {
+      const response = await fetch(`${API_BASE_URL}/api/users?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -83,7 +84,7 @@ const UsersManagementPage = () => {
   const fetchGroups = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/groups', {
+      const response = await fetch(`${API_BASE_URL}/api/groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -143,7 +144,9 @@ const UsersManagementPage = () => {
 
     try {
       const { token } = useAuthStore.getState();
-      const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users';
+      const url = editingUser
+        ? `${API_BASE_URL}/api/users/${editingUser.id}`
+        : `${API_BASE_URL}/api/users`;
       const method = editingUser ? 'PUT' : 'POST';
 
       const submitData = { ...formData };
@@ -209,12 +212,15 @@ const UsersManagementPage = () => {
 
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/users/${userToDelete.id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/users/${userToDelete.id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         setSuccess(t('errors.userDeletedSuccessfully'));

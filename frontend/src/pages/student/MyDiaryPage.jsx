@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { useTranslation } from 'react-i18next';
+import API_BASE_URL from '../../config/api';
 
 const MyDiaryPage = () => {
   const [diaryEntries, setDiaryEntries] = useState([]);
@@ -19,8 +21,9 @@ const MyDiaryPage = () => {
 
   const fetchDiaryEntries = async () => {
     try {
+      setLoading(true);
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/diary/my-entries', {
+      const response = await fetch(`${API_BASE_URL}/api/diary/my-entries`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -43,7 +46,7 @@ const MyDiaryPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const response = await fetch(
-        `/api/diary/program-dates/${user.group_id}`,
+        `${API_BASE_URL}/api/diary/program-dates/${user.group_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import API_BASE_URL from '../../config/api';
 
 const NotificationManagementPage = () => {
   const { t } = useTranslation();
@@ -37,7 +38,7 @@ const NotificationManagementPage = () => {
     if (!token) return;
 
     try {
-      const response = await fetch('/api/notifications/stats', {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -53,14 +54,17 @@ const NotificationManagementPage = () => {
   // Send system announcement
   const sendAnnouncement = async (values, { setSubmitting, resetForm }) => {
     try {
-      const response = await fetch('/api/notifications/announcement', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/announcement`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(values),
+        }
+      );
 
       if (response.ok) {
         addNotification({
@@ -94,10 +98,13 @@ const NotificationManagementPage = () => {
   const triggerDiaryReminders = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/notifications/diary-reminders', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/diary-reminders`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.ok) {
         addNotification({
@@ -129,10 +136,13 @@ const NotificationManagementPage = () => {
   const cleanupNotifications = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/notifications/cleanup', {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/cleanup`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();

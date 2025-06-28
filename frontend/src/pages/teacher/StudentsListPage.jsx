@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const StudentsListPage = () => {
   const { t } = useTranslation();
@@ -17,7 +18,7 @@ const StudentsListPage = () => {
   const fetchStudents = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/users/students', {
+      const response = await fetch(`${API_BASE_URL}/api/users/students`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

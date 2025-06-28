@@ -92,7 +92,7 @@ export const AccountPage = () => {
 
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/auth/change-password', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ export const AccountPage = () => {
         formData.append('profile_image', profileImage);
       }
 
-      const response = await fetch('/api/users/profile/me', {
+      const response = await fetch(`${API_BASE_URL}/api/users/profile/me`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

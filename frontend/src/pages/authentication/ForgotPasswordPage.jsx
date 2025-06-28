@@ -4,6 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import './page-auth.css';
 import { AuthWrapper } from './AuthWrapper';
+import API_BASE_URL from '../../config/api';
 
 const forgotPasswordSchema = Yup.object().shape({
   email: Yup.string()
@@ -22,7 +23,7 @@ export const ForgotPasswordPage = () => {
     setResetUrl('');
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

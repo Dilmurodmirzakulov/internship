@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const TeacherDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -20,11 +21,12 @@ const TeacherDashboard = () => {
       const { token } = useAuthStore.getState();
 
       // Use the optimized dashboard endpoint
-      const dashboardResponse = await fetch('/api/users/teacher/dashboard', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const dashboardResponse = await fetch(
+        `${API_BASE_URL}/api/users/teacher/dashboard`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (dashboardResponse.ok) {
         const dashboardData = await dashboardResponse.json();

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useUIStore } from '../store/uiStore';
 import { Link } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 
 const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState([]);
@@ -31,10 +32,10 @@ const NotificationDropdown = () => {
     setLoading(true);
     try {
       const [notificationsRes, statsRes] = await Promise.all([
-        fetch('/api/notifications?limit=10', {
+        fetch(`${API_BASE_URL}/api/notifications?limit=10`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('/api/notifications/stats', {
+        fetch(`${API_BASE_URL}/api/notifications/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -59,7 +60,7 @@ const NotificationDropdown = () => {
 
     try {
       const response = await fetch(
-        `/api/notifications/${notificationId}/read`,
+        `${API_BASE_URL}/api/notifications/${notificationId}/read`,
         {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` },
@@ -82,10 +83,13 @@ const NotificationDropdown = () => {
     if (!token) return;
 
     try {
-      const response = await fetch('/api/notifications/read-all', {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/read-all`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.ok) {
         setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));

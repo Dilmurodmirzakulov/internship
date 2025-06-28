@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const ReportsPage = () => {
   const { t } = useTranslation();
@@ -28,7 +29,7 @@ const ReportsPage = () => {
       // Try to use the comprehensive analytics endpoint first
       try {
         const analyticsResponse = await fetch(
-          `/api/users/admin/analytics?timeframe=${selectedTimeframe}`,
+          `${API_BASE_URL}/api/users/admin/analytics?timeframe=${selectedTimeframe}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -57,16 +58,19 @@ const ReportsPage = () => {
       // Fallback to individual endpoints if comprehensive endpoint fails
       const [overviewRes, usersRes, diaryAnalyticsRes, programsRes] =
         await Promise.all([
-          fetch('/api/diary/overview', {
+          fetch(`${API_BASE_URL}/api/diary/overview`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch('/api/users', {
+          fetch(`${API_BASE_URL}/api/users`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch(`/api/diary/analytics?timeframe=${selectedTimeframe}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch('/api/programs', {
+          fetch(
+            `${API_BASE_URL}/api/diary/analytics?timeframe=${selectedTimeframe}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+          fetch(`${API_BASE_URL}/api/programs`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

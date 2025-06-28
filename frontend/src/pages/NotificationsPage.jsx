@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { useUIStore } from '../store/uiStore';
 import { Link } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 
 const NotificationsPage = () => {
   const { t } = useTranslation();
@@ -33,10 +34,10 @@ const NotificationsPage = () => {
       });
 
       const [notificationsRes, statsRes] = await Promise.all([
-        fetch(`/api/notifications?${params}`, {
+        fetch(`${API_BASE_URL}/api/notifications?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('/api/notifications/stats', {
+        fetch(`${API_BASE_URL}/api/notifications/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -81,7 +82,7 @@ const NotificationsPage = () => {
 
     try {
       const response = await fetch(
-        `/api/notifications/${notificationId}/read`,
+        `${API_BASE_URL}/api/notifications/${notificationId}/read`,
         {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` },
@@ -104,10 +105,13 @@ const NotificationsPage = () => {
     if (!token) return;
 
     try {
-      const response = await fetch('/api/notifications/read-all', {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/read-all`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.ok) {
         setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const GroupsManagementPage = () => {
   const [groups, setGroups] = useState([]);
@@ -29,7 +30,7 @@ const GroupsManagementPage = () => {
     try {
       setLoading(true);
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/groups', {
+      const response = await fetch(`${API_BASE_URL}/api/groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,7 +52,7 @@ const GroupsManagementPage = () => {
   const fetchPrograms = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/programs', {
+      const response = await fetch(`${API_BASE_URL}/api/programs`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -82,8 +83,8 @@ const GroupsManagementPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const url = editingGroup
-        ? `/api/groups/${editingGroup.id}`
-        : '/api/groups';
+        ? `${API_BASE_URL}/api/groups/${editingGroup.id}`
+        : `${API_BASE_URL}/api/groups`;
       const method = editingGroup ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -135,7 +136,7 @@ const GroupsManagementPage = () => {
 
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/groups/${groupId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/groups/${groupId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

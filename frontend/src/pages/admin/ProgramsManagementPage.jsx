@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const ProgramsManagementPage = () => {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ const ProgramsManagementPage = () => {
     try {
       setLoading(true);
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/programs', {
+      const response = await fetch(`${API_BASE_URL}/api/programs`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,7 +66,7 @@ const ProgramsManagementPage = () => {
   const fetchGroups = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch('/api/groups', {
+      const response = await fetch(`${API_BASE_URL}/api/groups`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -121,8 +122,8 @@ const ProgramsManagementPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const url = editingProgram
-        ? `/api/programs/${editingProgram.id}`
-        : '/api/programs';
+        ? `${API_BASE_URL}/api/programs/${editingProgram.id}`
+        : `${API_BASE_URL}/api/programs`;
       const method = editingProgram ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -186,12 +187,15 @@ const ProgramsManagementPage = () => {
 
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/programs/${programId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/programs/${programId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         setSuccess('Program deleted successfully!');
