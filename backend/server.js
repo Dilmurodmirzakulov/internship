@@ -32,18 +32,18 @@ app.use(
   })
 );
 
-// Rate limiting - more generous for production deployment
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Very generous limit for production deployment
-  message: {
-    error: "Too many requests from this IP, please try again later.",
-    retryAfter: "15 minutes",
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
-app.use(limiter);
+// Rate limiting - temporarily disabled for debugging
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 1000, // Very generous limit for production deployment
+//   message: {
+//     error: "Too many requests from this IP, please try again later.",
+//     retryAfter: "15 minutes",
+//   },
+//   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+//   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+// });
+// app.use(limiter);
 
 // CORS configuration
 const allowedOrigins = [
