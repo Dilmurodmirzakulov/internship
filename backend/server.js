@@ -55,6 +55,7 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 console.log("🌐 Allowed CORS origins:", allowedOrigins);
+console.log("🚀 Rate limiting disabled for debugging");
 
 app.use(
   cors({
