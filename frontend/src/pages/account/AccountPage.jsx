@@ -158,10 +158,10 @@ export const AccountPage = () => {
         }
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to update profile');
+        setError(errorData.message || t('account.failedToUpdateProfile'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     } finally {
       setSubmitting(false);
     }
@@ -221,7 +221,7 @@ export const AccountPage = () => {
                 >
                   <i className="bx bx-reset d-block d-sm-none"></i>
                   <span className="d-none d-sm-block">
-                    {t('account.reset')}
+                    {t('account.resetImage')}
                   </span>
                 </button>
                 <p className="text-muted mb-0">{t('user.allowedFormats')}</p>
@@ -310,7 +310,7 @@ export const AccountPage = () => {
                         : t('common.saveChanges')}
                     </button>
                     <button type="reset" className="btn btn-outline-secondary">
-                      Cancel
+                      {t('account.cancel')}
                     </button>
                   </div>
                 </Form>
@@ -321,7 +321,7 @@ export const AccountPage = () => {
 
         {/* Change Password Section */}
         <div className="card mb-4">
-          <h5 className="card-header">Change Password</h5>
+          <h5 className="card-header">{t('account.changePassword')}</h5>
           <div className="card-body">
             <Formik
               initialValues={{
@@ -337,13 +337,13 @@ export const AccountPage = () => {
                   <div className="row">
                     <div className="mb-3 col-md-6">
                       <label htmlFor="currentPassword" className="form-label">
-                        Current Password
+                        {t('account.currentPassword')}
                       </label>
                       <Field
                         type="password"
                         className="form-control"
                         name="currentPassword"
-                        placeholder="Enter current password"
+                        placeholder={t('account.enterCurrentPassword')}
                       />
                       <ErrorMessage
                         name="currentPassword"
@@ -355,13 +355,13 @@ export const AccountPage = () => {
                   <div className="row">
                     <div className="mb-3 col-md-6">
                       <label htmlFor="newPassword" className="form-label">
-                        New Password
+                        {t('account.newPassword')}
                       </label>
                       <Field
                         type="password"
                         className="form-control"
                         name="newPassword"
-                        placeholder="Enter new password"
+                        placeholder={t('account.enterNewPassword')}
                       />
                       <ErrorMessage
                         name="newPassword"
@@ -371,13 +371,13 @@ export const AccountPage = () => {
                     </div>
                     <div className="mb-3 col-md-6">
                       <label htmlFor="confirmPassword" className="form-label">
-                        Confirm New Password
+                        {t('account.confirmNewPassword')}
                       </label>
                       <Field
                         type="password"
                         className="form-control"
                         name="confirmPassword"
-                        placeholder="Confirm new password"
+                        placeholder={t('account.confirmPassword')}
                       />
                       <ErrorMessage
                         name="confirmPassword"
@@ -392,10 +392,12 @@ export const AccountPage = () => {
                       className="btn btn-primary me-2"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? 'Changing...' : 'Change Password'}
+                      {isSubmitting
+                        ? t('account.changingPassword')
+                        : t('account.changePasswordButton')}
                     </button>
                     <button type="reset" className="btn btn-outline-secondary">
-                      Cancel
+                      {t('account.cancel')}
                     </button>
                   </div>
                 </Form>
@@ -405,17 +407,14 @@ export const AccountPage = () => {
         </div>
 
         <div className="card">
-          <h5 className="card-header">Delete Account</h5>
+          <h5 className="card-header">{t('account.deleteAccount')}</h5>
           <div className="card-body">
             <div className="mb-3 col-12 mb-0">
               <div className="alert alert-warning">
                 <h6 className="alert-heading mb-1">
-                  Are you sure you want to delete your account?
+                  {t('account.deleteAccountWarning')}
                 </h6>
-                <p className="mb-0">
-                  Once you delete your account, there is no going back. Please
-                  be certain.
-                </p>
+                <p className="mb-0">{t('account.deleteAccountWarningText')}</p>
               </div>
             </div>
             <form
@@ -430,7 +429,7 @@ export const AccountPage = () => {
                   id="accountActivation"
                 />
                 <label className="form-check-label" htmlFor="accountActivation">
-                  I confirm my account deactivation
+                  {t('account.confirmAccountDeletion')}
                 </label>
               </div>
               <button
@@ -438,7 +437,7 @@ export const AccountPage = () => {
                 type="submit"
                 className="btn btn-danger deactivate-account"
               >
-                Deactivate Account
+                {t('account.deactivateAccount')}
               </button>
             </form>
           </div>

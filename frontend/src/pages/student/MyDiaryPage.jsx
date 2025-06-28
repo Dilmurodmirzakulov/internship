@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import API_BASE_URL from '../../config/api';
 
 const MyDiaryPage = () => {
+  const { t } = useTranslation();
   const [diaryEntries, setDiaryEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,10 +34,10 @@ const MyDiaryPage = () => {
         const data = await response.json();
         setDiaryEntries(data.entries || []);
       } else {
-        setError('Failed to fetch diary entries');
+        setError(t('diary.failedToFetch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -64,7 +65,9 @@ const MyDiaryPage = () => {
             name:
               data.programs.length === 1
                 ? data.programs[0].name
-                : `${data.programs.length} Active Programs`,
+                : t('diary.multipleActivePrograms', {
+                    count: data.programs.length,
+                  }),
             start_date: Math.min(
               ...data.programs.map(p => new Date(p.start_date))
             ),
@@ -93,14 +96,16 @@ const MyDiaryPage = () => {
 
   const getStatusBadge = entry => {
     if (!entry.is_submitted) {
-      return <span className="badge bg-warning">Draft</span>;
+      return <span className="badge bg-warning">{t('diary.draft')}</span>;
     }
     if (entry.mark !== null) {
       return (
-        <span className="badge bg-success">Marked ({entry.mark}/100)</span>
+        <span className="badge bg-success">
+          {t('diary.marked')} ({entry.mark}/100)
+        </span>
       );
     }
-    return <span className="badge bg-info">Submitted</span>;
+    return <span className="badge bg-info">{t('diary.submitted')}</span>;
   };
 
   const getDateStatus = dateStr => {
@@ -142,19 +147,19 @@ const MyDiaryPage = () => {
   const getDateStatusText = status => {
     switch (status) {
       case 'completed':
-        return 'Completed';
+        return t('diary.status.completed');
       case 'submitted':
-        return 'Submitted';
+        return t('diary.status.submitted');
       case 'draft':
-        return 'Draft';
+        return t('diary.status.draft');
       case 'missing':
-        return 'Missing';
+        return t('diary.status.missing');
       case 'disabled':
-        return 'Holiday';
+        return t('diary.status.holiday');
       case 'weekend':
-        return 'Weekend';
+        return t('diary.status.weekend');
       case 'future':
-        return 'Upcoming';
+        return t('diary.status.upcoming');
       default:
         return '';
     }
@@ -192,12 +197,12 @@ const MyDiaryPage = () => {
     return (
       <div className="card mb-4">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Program Calendar</h5>
+          <h5 className="mb-0">{t('diary.programCalendar')}</h5>
           <button
             className="btn btn-outline-secondary btn-sm"
             onClick={() => setShowCalendar(!showCalendar)}
           >
-            {showCalendar ? 'Hide Calendar' : 'Show Calendar'}
+            {showCalendar ? t('diary.hideCalendar') : t('diary.showCalendar')}
           </button>
         </div>
 
@@ -213,7 +218,9 @@ const MyDiaryPage = () => {
               {/* Show multiple programs if available */}
               {program.programs && program.programs.length > 1 && (
                 <div className="mb-3">
-                  <small className="text-muted">Active Programs:</small>
+                  <small className="text-muted">
+                    {t('diary.activePrograms')}:
+                  </small>
                   <div className="mt-1">
                     {program.programs.map((prog, index) => (
                       <span key={index} className="badge bg-primary me-1 mb-1">
@@ -226,12 +233,22 @@ const MyDiaryPage = () => {
 
               {/* Legend */}
               <div className="d-flex flex-wrap gap-2 mb-3">
-                <span className="badge bg-success">Completed</span>
-                <span className="badge bg-warning">Submitted</span>
-                <span className="badge bg-info">Draft</span>
-                <span className="badge bg-danger">Missing</span>
-                <span className="badge bg-secondary">Holiday</span>
-                <span className="badge bg-light text-dark">Weekend</span>
+                <span className="badge bg-success">
+                  {t('diary.status.completed')}
+                </span>
+                <span className="badge bg-warning">
+                  {t('diary.status.submitted')}
+                </span>
+                <span className="badge bg-info">{t('diary.status.draft')}</span>
+                <span className="badge bg-danger">
+                  {t('diary.status.missing')}
+                </span>
+                <span className="badge bg-secondary">
+                  {t('diary.status.holiday')}
+                </span>
+                <span className="badge bg-light text-dark">
+                  {t('diary.status.weekend')}
+                </span>
               </div>
             </div>
 
@@ -321,7 +338,7 @@ const MyDiaryPage = () => {
       <div>
         <div className="d-flex justify-content-center">
           <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
+            <span className="visually-hidden">{t('common.loading')}</span>
           </div>
         </div>
       </div>
@@ -333,14 +350,14 @@ const MyDiaryPage = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h4 className="fw-bold mb-1">My Internship Diary</h4>
+          <h4 className="fw-bold mb-1">{t('diary.myInternshipDiary')}</h4>
           <p className="text-muted mb-0">
-            Track your daily internship activities and progress
+            {t('diary.trackActivitiesAndProgress')}
           </p>
         </div>
         <Link to="/student/diary/entry" className="btn btn-primary">
           <i className="bx bx-plus me-1"></i>
-          New Entry
+          {t('diary.newEntry')}
         </Link>
       </div>
 
@@ -357,7 +374,7 @@ const MyDiaryPage = () => {
             <div className="card-body">
               <div className="d-flex align-items-start justify-content-between">
                 <div className="content-left">
-                  <span>Total Entries</span>
+                  <span>{t('diary.totalEntries')}</span>
                   <div className="d-flex align-items-end mt-2">
                     <h4 className="mb-0 me-2">{diaryEntries.length}</h4>
                   </div>
@@ -377,7 +394,7 @@ const MyDiaryPage = () => {
             <div className="card-body">
               <div className="d-flex align-items-start justify-content-between">
                 <div className="content-left">
-                  <span>Submitted</span>
+                  <span>{t('diary.submitted')}</span>
                   <div className="d-flex align-items-end mt-2">
                     <h4 className="mb-0 me-2">
                       {diaryEntries.filter(entry => entry.is_submitted).length}
@@ -399,7 +416,7 @@ const MyDiaryPage = () => {
             <div className="card-body">
               <div className="d-flex align-items-start justify-content-between">
                 <div className="content-left">
-                  <span>Marked</span>
+                  <span>{t('diary.marked')}</span>
                   <div className="d-flex align-items-end mt-2">
                     <h4 className="mb-0 me-2">
                       {diaryEntries.filter(entry => entry.mark !== null).length}
@@ -421,7 +438,7 @@ const MyDiaryPage = () => {
             <div className="card-body">
               <div className="d-flex align-items-start justify-content-between">
                 <div className="content-left">
-                  <span>Average Mark</span>
+                  <span>{t('diary.averageMark')}</span>
                   <div className="d-flex align-items-end mt-2">
                     <h4 className="mb-0 me-2">
                       {diaryEntries.filter(entry => entry.mark !== null)
@@ -451,8 +468,10 @@ const MyDiaryPage = () => {
       {/* Diary Entries List */}
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Diary Entries</h5>
-          <small className="text-muted">{diaryEntries.length} entries</small>
+          <h5 className="mb-0">{t('diary.diaryEntries')}</h5>
+          <small className="text-muted">
+            {diaryEntries.length} {t('diary.entries')}
+          </small>
         </div>
         <div className="card-body">
           {diaryEntries.length === 0 ? (
@@ -462,14 +481,11 @@ const MyDiaryPage = () => {
                   <i className="bx bx-book-open bx-lg"></i>
                 </span>
               </div>
-              <h5 className="mb-2">No diary entries yet</h5>
-              <p className="text-muted mb-4">
-                Start documenting your internship journey by creating your first
-                diary entry.
-              </p>
+              <h5 className="mb-2">{t('diary.noDiaryEntries')}</h5>
+              <p className="text-muted mb-4">{t('diary.startDocumenting')}</p>
               <Link to="/student/diary/entry" className="btn btn-primary">
                 <i className="bx bx-plus me-1"></i>
-                Create First Entry
+                {t('diary.createFirstEntry')}
               </Link>
             </div>
           ) : (
@@ -477,11 +493,11 @@ const MyDiaryPage = () => {
               <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Mark</th>
-                    <th>Teacher Comment</th>
-                    <th>Actions</th>
+                    <th>{t('common.date')}</th>
+                    <th>{t('common.status')}</th>
+                    <th>{t('diary.mark')}</th>
+                    <th>{t('diary.teacherComment')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -498,7 +514,7 @@ const MyDiaryPage = () => {
                             </h6>
                             {entry.submitted_at && (
                               <small className="text-muted">
-                                Submitted:{' '}
+                                {t('diary.submitted')}:{' '}
                                 {new Date(
                                   entry.submitted_at
                                 ).toLocaleDateString()}
@@ -511,7 +527,9 @@ const MyDiaryPage = () => {
                           {entry.mark !== null ? (
                             <span className="fw-medium">{entry.mark}/100</span>
                           ) : (
-                            <span className="text-muted">Not marked</span>
+                            <span className="text-muted">
+                              {t('diary.notMarked')}
+                            </span>
                           )}
                         </td>
                         <td>
@@ -523,7 +541,9 @@ const MyDiaryPage = () => {
                               {entry.teacher_comment}
                             </div>
                           ) : (
-                            <span className="text-muted">No comment</span>
+                            <span className="text-muted">
+                              {t('diary.noComment')}
+                            </span>
                           )}
                         </td>
                         <td>
@@ -540,14 +560,16 @@ const MyDiaryPage = () => {
                                 className="dropdown-item"
                                 to={`/student/diary/entry/${entry.entry_date}`}
                               >
-                                <i className="bx bx-show me-1"></i> View
+                                <i className="bx bx-show me-1"></i>{' '}
+                                {t('common.view')}
                               </Link>
                               {!entry.is_submitted && (
                                 <Link
                                   className="dropdown-item"
                                   to={`/student/diary/entry/${entry.entry_date}`}
                                 >
-                                  <i className="bx bx-edit-alt me-1"></i> Edit
+                                  <i className="bx bx-edit-alt me-1"></i>{' '}
+                                  {t('common.edit')}
                                 </Link>
                               )}
                             </div>

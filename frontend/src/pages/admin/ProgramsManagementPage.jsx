@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import API_BASE_URL from '../../config/api';
+import { formatDate } from '../../utils/dateUtils';
 
 const ProgramsManagementPage = () => {
   const { t } = useTranslation();
@@ -26,13 +27,13 @@ const ProgramsManagementPage = () => {
   const { user } = useAuthStore();
 
   const daysOfWeek = [
-    { value: 'sunday', label: 'Sunday' },
-    { value: 'monday', label: 'Monday' },
-    { value: 'tuesday', label: 'Tuesday' },
-    { value: 'wednesday', label: 'Wednesday' },
-    { value: 'thursday', label: 'Thursday' },
-    { value: 'friday', label: 'Friday' },
-    { value: 'saturday', label: 'Saturday' },
+    { value: 'sunday', label: t('common.days.sunday') },
+    { value: 'monday', label: t('common.days.monday') },
+    { value: 'tuesday', label: t('common.days.tuesday') },
+    { value: 'wednesday', label: t('common.days.wednesday') },
+    { value: 'thursday', label: t('common.days.thursday') },
+    { value: 'friday', label: t('common.days.friday') },
+    { value: 'saturday', label: t('common.days.saturday') },
   ];
 
   useEffect(() => {
@@ -54,10 +55,10 @@ const ProgramsManagementPage = () => {
         const data = await response.json();
         setPrograms(data.programs || []);
       } else {
-        setError('Failed to fetch programs');
+        setError(t('programs.failedToFetch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -115,7 +116,7 @@ const ProgramsManagementPage = () => {
     setSuccess('');
 
     if (formData.assigned_group_ids.length === 0) {
-      setError('Please select at least one group for the program.');
+      setError(t('programs.selectAtLeastOneGroup'));
       return;
     }
 
@@ -138,18 +139,18 @@ const ProgramsManagementPage = () => {
       if (response.ok) {
         setSuccess(
           editingProgram
-            ? 'Program updated successfully!'
-            : 'Program created successfully!'
+            ? t('programs.updatedSuccessfully')
+            : t('programs.createdSuccessfully')
         );
         setShowModal(false);
         resetForm();
         fetchPrograms();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to save program');
+        setError(errorData.message || t('programs.failedToSave'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     }
   };
 
@@ -178,12 +179,7 @@ const ProgramsManagementPage = () => {
   };
 
   const handleDelete = async programId => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this program? This will affect all associated groups.'
-      )
-    )
-      return;
+    if (!confirm(t('programs.confirmDelete'))) return;
 
     try {
       const { token } = useAuthStore.getState();
@@ -198,14 +194,14 @@ const ProgramsManagementPage = () => {
       );
 
       if (response.ok) {
-        setSuccess('Program deleted successfully!');
+        setSuccess(t('programs.deletedSuccessfully'));
         fetchPrograms();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to delete program');
+        setError(errorData.message || t('programs.failedToDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     }
   };
 
@@ -225,39 +221,39 @@ const ProgramsManagementPage = () => {
   const getStatusBadge = isActive => {
     return (
       <span className={`badge bg-${isActive ? 'success' : 'secondary'}`}>
-        {isActive ? 'Active' : 'Inactive'}
+        {isActive ? t('common.active') : t('common.inactive')}
       </span>
     );
   };
 
   const getProgramStatus = program => {
-    if (!program.start_date || !program.end_date) return 'Not Scheduled';
+    if (!program.start_date || !program.end_date)
+      return t('programs.notScheduled');
 
     const now = new Date();
     const start = new Date(program.start_date);
     const end = new Date(program.end_date);
 
-    if (now < start) return 'Upcoming';
-    if (now > end) return 'Completed';
-    return 'In Progress';
+    if (now < start) return t('programs.upcoming');
+    if (now > end) return t('programs.completed');
+    return t('programs.inProgress');
   };
 
   const getStatusColor = status => {
     switch (status) {
-      case 'Upcoming':
+      case t('programs.upcoming'):
         return 'info';
-      case 'In Progress':
+      case t('programs.inProgress'):
         return 'primary';
-      case 'Completed':
+      case t('programs.completed'):
         return 'success';
       default:
         return 'secondary';
     }
   };
 
-  const formatDate = dateString => {
-    if (!dateString) return 'Not set';
-    return new Date(dateString).toLocaleDateString();
+  const formatDateSafe = dateString => {
+    return formatDate(dateString, t('common.notSet'));
   };
 
   const getProgramGroups = program => {
@@ -282,10 +278,8 @@ const ProgramsManagementPage = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h4 className="fw-bold mb-1">Programs Management</h4>
-          <p className="text-muted mb-0">
-            Manage internship programs and their schedules
-          </p>
+          <h4 className="fw-bold mb-1">{t('programs.title')}</h4>
+          <p className="text-muted mb-0">{t('programs.description')}</p>
         </div>
         <button
           type="button"
@@ -296,7 +290,7 @@ const ProgramsManagementPage = () => {
           }}
         >
           <i className="bx bx-plus me-1"></i>
-          Add Program
+          {t('programs.addProgram')}
         </button>
       </div>
 
@@ -317,7 +311,7 @@ const ProgramsManagementPage = () => {
         {loading ? (
           <div className="col-12 d-flex justify-content-center">
             <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <span className="visually-hidden">{t('common.loading')}</span>
             </div>
           </div>
         ) : programs.length === 0 ? (
@@ -329,10 +323,9 @@ const ProgramsManagementPage = () => {
                     <i className="bx bx-calendar bx-lg"></i>
                   </span>
                 </div>
-                <h5 className="mb-2">No Programs Found</h5>
+                <h5 className="mb-2">{t('programs.noProgramsFound')}</h5>
                 <p className="text-muted mb-4">
-                  Create your first internship program to start organizing the
-                  curriculum.
+                  {t('programs.createFirstProgram')}
                 </p>
                 <button
                   className="btn btn-primary"
@@ -342,7 +335,7 @@ const ProgramsManagementPage = () => {
                   }}
                 >
                   <i className="bx bx-plus me-1"></i>
-                  Create First Program
+                  {t('programs.createFirstProgramButton')}
                 </button>
               </div>
             </div>
@@ -371,13 +364,15 @@ const ProgramsManagementPage = () => {
                           className="dropdown-item"
                           onClick={() => handleEdit(program)}
                         >
-                          <i className="bx bx-edit-alt me-1"></i> Edit
+                          <i className="bx bx-edit-alt me-1"></i>{' '}
+                          {t('common.edit')}
                         </button>
                         <button
                           className="dropdown-item text-danger"
                           onClick={() => handleDelete(program.id)}
                         >
-                          <i className="bx bx-trash me-1"></i> Delete
+                          <i className="bx bx-trash me-1"></i>{' '}
+                          {t('common.delete')}
                         </button>
                       </div>
                     </div>
@@ -402,21 +397,27 @@ const ProgramsManagementPage = () => {
 
                   <div className="row mb-3">
                     <div className="col-6">
-                      <small className="text-muted">Start Date:</small>
+                      <small className="text-muted">
+                        {t('programs.startDate')}:
+                      </small>
                       <p className="mb-0 fw-medium">
-                        {formatDate(program.start_date)}
+                        {formatDateSafe(program.start_date)}
                       </p>
                     </div>
                     <div className="col-6">
-                      <small className="text-muted">End Date:</small>
+                      <small className="text-muted">
+                        {t('programs.endDate')}:
+                      </small>
                       <p className="mb-0 fw-medium">
-                        {formatDate(program.end_date)}
+                        {formatDateSafe(program.end_date)}
                       </p>
                     </div>
                   </div>
 
                   <div className="mb-3">
-                    <small className="text-muted">Assigned Groups:</small>
+                    <small className="text-muted">
+                      {t('programs.assignedGroups')}:
+                    </small>
                     <div className="mt-1">
                       {getProgramGroups(program).length > 0 ? (
                         getProgramGroups(program).map((groupName, index) => (
@@ -428,7 +429,9 @@ const ProgramsManagementPage = () => {
                           </span>
                         ))
                       ) : (
-                        <span className="text-muted">No groups assigned</span>
+                        <span className="text-muted">
+                          {t('programs.noGroupsAssigned')}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -436,14 +439,16 @@ const ProgramsManagementPage = () => {
                   {program.disabled_days &&
                     program.disabled_days.length > 0 && (
                       <div className="mb-3">
-                        <small className="text-muted">Disabled Days:</small>
+                        <small className="text-muted">
+                          {t('programs.disabledDays')}:
+                        </small>
                         <div className="mt-1">
                           {program.disabled_days.map(day => (
                             <span
                               key={day}
                               className="badge bg-light text-dark me-1"
                             >
-                              {day.charAt(0).toUpperCase() + day.slice(1)}
+                              {t(`common.days.${day.toLowerCase()}`)}
                             </span>
                           ))}
                         </div>
@@ -451,10 +456,10 @@ const ProgramsManagementPage = () => {
                     )}
 
                   <div className="mt-3">
-                    <small className="text-muted">Created:</small>
-                    <p className="mb-0">
-                      {new Date(program.created_at).toLocaleDateString()}
-                    </p>
+                    <small className="text-muted">
+                      {t('programs.created')}:
+                    </small>
+                    <p className="mb-0">{formatDateSafe(program.created_at)}</p>
                   </div>
                 </div>
               </div>
@@ -474,7 +479,9 @@ const ProgramsManagementPage = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {editingProgram ? 'Edit Program' : 'Add New Program'}
+                  {editingProgram
+                    ? t('programs.editProgram')
+                    : t('programs.addNewProgram')}
                 </h5>
                 <button
                   type="button"
@@ -486,23 +493,27 @@ const ProgramsManagementPage = () => {
                 <div className="modal-body">
                   <div className="row">
                     <div className="col-md-12 mb-3">
-                      <label className="form-label">Program Name *</label>
+                      <label className="form-label">
+                        {t('programs.programName')} *
+                      </label>
                       <input
                         type="text"
                         className="form-control"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        placeholder="e.g., Summer Internship 2024"
+                        placeholder={t('programs.programNamePlaceholder')}
                         required
                       />
                     </div>
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Assigned Groups *</label>
+                    <label className="form-label">
+                      {t('programs.assignedGroups')} *
+                    </label>
                     <div className="form-text mb-2">
-                      Select one or more groups for this program
+                      {t('programs.selectGroupsText')}
                     </div>
                     <div className="row">
                       {groups.map(group => (
@@ -530,26 +541,30 @@ const ProgramsManagementPage = () => {
                     </div>
                     {formData.assigned_group_ids.length === 0 && (
                       <div className="text-danger small mt-1">
-                        Please select at least one group
+                        {t('programs.selectAtLeastOneGroup')}
                       </div>
                     )}
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Description</label>
+                    <label className="form-label">
+                      {t('programs.description')}
+                    </label>
                     <textarea
                       className="form-control"
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
                       rows="3"
-                      placeholder="Brief description of the internship program..."
+                      placeholder={t('programs.descriptionPlaceholder')}
                     />
                   </div>
 
                   <div className="row">
                     <div className="col-md-6 mb-3">
-                      <label className="form-label">Start Date *</label>
+                      <label className="form-label">
+                        {t('programs.startDate')} *
+                      </label>
                       <input
                         type="date"
                         className="form-control"
@@ -561,7 +576,9 @@ const ProgramsManagementPage = () => {
                     </div>
 
                     <div className="col-md-6 mb-3">
-                      <label className="form-label">End Date *</label>
+                      <label className="form-label">
+                        {t('programs.endDate')} *
+                      </label>
                       <input
                         type="date"
                         className="form-control"
@@ -574,9 +591,11 @@ const ProgramsManagementPage = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Disabled Days</label>
+                    <label className="form-label">
+                      {t('programs.disabledDays')}
+                    </label>
                     <div className="form-text mb-2">
-                      Select days when diary entries should not be required
+                      {t('programs.disabledDaysText')}
                     </div>
                     <div className="row">
                       {daysOfWeek.map(day => (
@@ -610,7 +629,9 @@ const ProgramsManagementPage = () => {
                         checked={formData.is_active}
                         onChange={handleInputChange}
                       />
-                      <label className="form-check-label">Active Program</label>
+                      <label className="form-check-label">
+                        {t('programs.activeProgram')}
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -620,10 +641,12 @@ const ProgramsManagementPage = () => {
                     className="btn btn-outline-secondary"
                     onClick={() => setShowModal(false)}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary">
-                    {editingProgram ? 'Update Program' : 'Create Program'}
+                    {editingProgram
+                      ? t('programs.updateProgram')
+                      : t('programs.createProgram')}
                   </button>
                 </div>
               </form>

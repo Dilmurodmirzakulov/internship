@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import API_BASE_URL from '../../config/api';
+import { formatDate } from '../../utils/dateUtils';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
@@ -394,7 +395,7 @@ const AdminDashboard = () => {
                           </td>
                           <td>
                             <small className="text-muted">
-                              {new Date(user.created_at).toLocaleDateString()}
+                              {formatDate(user.created_at, t('common.notSet'))}
                             </small>
                           </td>
                         </tr>

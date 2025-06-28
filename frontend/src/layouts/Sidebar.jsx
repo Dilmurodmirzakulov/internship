@@ -106,12 +106,18 @@ const Sidebar = () => {
     >
       <div className="app-brand demo px-3">
         <Link
-          aria-label="Navigate to sneat homepage"
+          aria-label="Navigate to Techamal homepage"
           to="/"
           className="app-brand-link"
         >
-          <span className="app-brand-text demo menu-text fw-bold ms-2">
-            {t('program.internshipProgram')}
+          <span className="app-brand-logo demo">
+            <i
+              className="bx bx-book-open"
+              style={{ fontSize: '1.5rem', color: '#696cff' }}
+            ></i>
+          </span>
+          <span className="app-brand-text demo menu-text fw-bold ms-2 text-uppercase">
+            TECHAMAL
           </span>
         </Link>
 

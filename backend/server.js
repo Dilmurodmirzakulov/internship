@@ -32,23 +32,6 @@ app.use(
   })
 );
 
-// Rate limiting - very generous for production
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 2000, // Very generous limit for production deployment
-  message: {
-    error: "Too many requests from this IP, please try again later.",
-    retryAfter: "15 minutes",
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  skip: (req) => {
-    // Skip rate limiting for health checks
-    return req.path === "/api/health";
-  },
-});
-app.use(limiter);
-
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173",
@@ -87,6 +70,23 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
+
+// Rate limiting - very generous for production (must come AFTER CORS so that 429 responses include CORS headers)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5000, // Increase the limit to reduce accidental throttling
+  message: {
+    error: "Too many requests from this IP, please try again later.",
+    retryAfter: "15 minutes",
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  skip: (req) => {
+    // Skip rate limiting for health checks
+    return req.path === "/api/health";
+  },
+});
+app.use(limiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));

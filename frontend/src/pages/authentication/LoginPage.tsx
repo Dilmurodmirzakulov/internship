@@ -92,7 +92,7 @@ const LoginPage: React.FC = () => {
                   ></i>
                 </span>
                 <span className="app-brand-text demo text-body fw-bolder">
-                  {t('program.internshipProgram')}
+                  TECHAMAL
                 </span>
               </a>
             </div>

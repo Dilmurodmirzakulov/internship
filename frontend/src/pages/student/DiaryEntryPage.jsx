@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
+import API_BASE_URL from '../../config/api';
 
 const DiaryEntryPage = () => {
+  const { t } = useTranslation();
   const { date } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -33,7 +36,7 @@ const DiaryEntryPage = () => {
     try {
       const { token } = useAuthStore.getState();
       const response = await fetch(
-        `/api/diary/program-dates/${user.group_id}`,
+        `${API_BASE_URL}/api/diary/program-dates/${user.group_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,7 +57,7 @@ const DiaryEntryPage = () => {
   const fetchExistingEntry = async () => {
     try {
       const { token } = useAuthStore.getState();
-      const response = await fetch(`/api/diary/entry/${date}`, {
+      const response = await fetch(`${API_BASE_URL}/api/diary/entry/${date}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -93,7 +96,7 @@ const DiaryEntryPage = () => {
     if (file) {
       // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
+        setError(t('diary.fileSizeError'));
         return;
       }
 
@@ -132,8 +135,8 @@ const DiaryEntryPage = () => {
       }
 
       const url = isEditing
-        ? `/api/diary/entry/${existingEntry.id}`
-        : '/api/diary/entry';
+        ? `${API_BASE_URL}/api/diary/entry/${existingEntry.id}`
+        : `${API_BASE_URL}/api/diary/entry`;
 
       const method = isEditing ? 'PUT' : 'POST';
 
@@ -148,7 +151,7 @@ const DiaryEntryPage = () => {
       if (response.ok) {
         const data = await response.json();
         setSuccess(
-          isDraft ? 'Entry saved as draft!' : 'Entry submitted successfully!'
+          isDraft ? t('diary.savedAsDraft') : t('diary.submittedSuccessfully')
         );
 
         setTimeout(() => {
@@ -156,10 +159,10 @@ const DiaryEntryPage = () => {
         }, 1500);
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to save entry');
+        setError(errorData.message || t('diary.failedToSave'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -185,8 +188,29 @@ const DiaryEntryPage = () => {
 
   const isDateDisabled = dateStr => {
     const dateInfo = programDates.find(d => d.date === dateStr);
-    return dateInfo?.is_disabled || dateInfo?.is_weekend;
+    // If the date is not part of any active program OR explicitly disabled/weekend, treat as disabled
+    return !dateInfo || dateInfo.is_disabled || dateInfo.is_weekend;
   };
+
+  const isDateValid = dateStr => !isDateDisabled(dateStr);
+
+  // Ensure selected date is valid whenever programDates change
+  useEffect(() => {
+    if (programDates.length) {
+      if (isDateDisabled(formData.entry_date)) {
+        // Fallback to today if valid, otherwise first valid program date
+        const todayStr = new Date().toISOString().split('T')[0];
+        const fallbackDate = isDateValid(todayStr)
+          ? todayStr
+          : programDates.find(d => isDateValid(d.date))?.date;
+
+        if (fallbackDate) {
+          setFormData(prev => ({ ...prev, entry_date: fallbackDate }));
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [programDates]);
 
   const validDateRange = getValidDateRange();
 
@@ -196,12 +220,14 @@ const DiaryEntryPage = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h4 className="fw-bold mb-1">
-            {isEditing ? 'Edit Diary Entry' : 'New Diary Entry'}
+            {isEditing ? t('diary.editEntry') : t('diary.newEntry')}
           </h4>
           <p className="text-muted mb-0">
             {isEditing
-              ? `Editing entry for ${new Date(formData.entry_date).toLocaleDateString()}`
-              : 'Document your internship activities and learnings'}
+              ? t('diary.editingEntryFor', {
+                  date: new Date(formData.entry_date).toLocaleDateString(),
+                })
+              : t('diary.documentActivities')}
           </p>
         </div>
         <button
@@ -210,7 +236,7 @@ const DiaryEntryPage = () => {
           onClick={() => navigate('/student/diary')}
         >
           <i className="bx bx-arrow-back me-1"></i>
-          Back to Diary
+          {t('diary.backToDiary')}
         </button>
       </div>
 
@@ -232,7 +258,7 @@ const DiaryEntryPage = () => {
           <div className="card-body">
             <h6 className="mb-2">
               <i className="bx bx-calendar me-1"></i>
-              Active Programs
+              {t('diary.activePrograms')}
             </h6>
             <div className="d-flex flex-wrap gap-2 mb-2">
               {programs.map((program, index) => (
@@ -242,14 +268,14 @@ const DiaryEntryPage = () => {
               ))}
             </div>
             <small className="text-muted">
-              Valid dates:{' '}
+              {t('diary.validDates')}{' '}
               {validDateRange.min
                 ? new Date(validDateRange.min).toLocaleDateString()
-                : 'N/A'}{' '}
+                : t('common.notAvailable')}{' '}
               -{' '}
               {validDateRange.max
                 ? new Date(validDateRange.max).toLocaleDateString()
-                : 'N/A'}
+                : t('common.notAvailable')}
             </small>
           </div>
         </div>
@@ -261,33 +287,35 @@ const DiaryEntryPage = () => {
           <div className="card-body">
             <div className="row align-items-center">
               <div className="col-md-6">
-                <h6 className="mb-1">Entry Status</h6>
+                <h6 className="mb-1">{t('diary.entryStatus')}</h6>
                 <div className="d-flex align-items-center">
                   {existingEntry.is_submitted ? (
                     <>
-                      <span className="badge bg-success me-2">Submitted</span>
+                      <span className="badge bg-success me-2">
+                        {t('diary.submitted')}
+                      </span>
                       <small className="text-muted">
-                        on{' '}
+                        {t('diary.on')}{' '}
                         {new Date(
                           existingEntry.submitted_at
                         ).toLocaleDateString()}
                       </small>
                     </>
                   ) : (
-                    <span className="badge bg-warning">Draft</span>
+                    <span className="badge bg-warning">{t('diary.draft')}</span>
                   )}
                 </div>
               </div>
               {existingEntry.mark !== null && (
                 <div className="col-md-6">
-                  <h6 className="mb-1">Teacher Evaluation</h6>
+                  <h6 className="mb-1">{t('diary.teacherEvaluation')}</h6>
                   <div className="d-flex align-items-center">
                     <span className="badge bg-info me-2">
-                      Mark: {existingEntry.mark}/100
+                      {t('diary.mark')}: {existingEntry.mark}/100
                     </span>
                     {existingEntry.marked_at && (
                       <small className="text-muted">
-                        on{' '}
+                        {t('diary.on')}{' '}
                         {new Date(existingEntry.marked_at).toLocaleDateString()}
                       </small>
                     )}
@@ -297,7 +325,7 @@ const DiaryEntryPage = () => {
             </div>
             {existingEntry.teacher_comment && (
               <div className="mt-3">
-                <h6 className="mb-1">Teacher Comment</h6>
+                <h6 className="mb-1">{t('diary.teacherComment')}</h6>
                 <p className="text-muted mb-0">
                   {existingEntry.teacher_comment}
                 </p>
@@ -310,18 +338,22 @@ const DiaryEntryPage = () => {
       {/* Entry Form */}
       <div className="card">
         <div className="card-header">
-          <h5 className="mb-0">Diary Entry Details</h5>
+          <h5 className="mb-0">{t('diary.entryDetails')}</h5>
         </div>
         <div className="card-body">
           <form onSubmit={e => handleSubmit(e, false)}>
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label htmlFor="entry_date" className="form-label">
-                  Entry Date <span className="text-danger">*</span>
+                  {t('diary.entryDate')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="date"
-                  className="form-control"
+                  className={
+                    !isDateValid(formData.entry_date)
+                      ? 'form-control is-invalid'
+                      : 'form-control'
+                  }
                   id="entry_date"
                   name="entry_date"
                   value={formData.entry_date}
@@ -331,15 +363,16 @@ const DiaryEntryPage = () => {
                   disabled={!canEdit}
                   required
                 />
-                <div className="form-text">
-                  Select a date within the active program period. Weekends and
-                  holidays are disabled.
-                </div>
+                <div className="form-text">{t('diary.selectDateHelp')}</div>
+                {!isDateValid(formData.entry_date) && (
+                  <div className="invalid-feedback d-block">
+                    {t('diary.invalidDateSelection')}
+                  </div>
+                )}
                 {formData.entry_date && isDateDisabled(formData.entry_date) && (
                   <div className="text-warning small mt-1">
                     <i className="bx bx-warning me-1"></i>
-                    This date may be disabled (weekend/holiday). Please check
-                    with your supervisor.
+                    {t('diary.dateDisabledWarning')}
                   </div>
                 )}
               </div>
@@ -347,7 +380,7 @@ const DiaryEntryPage = () => {
 
             <div className="mb-3">
               <label htmlFor="text_report" className="form-label">
-                Daily Report <span className="text-danger">*</span>
+                {t('diary.dailyReport')} <span className="text-danger">*</span>
               </label>
               <textarea
                 className="form-control"
@@ -357,18 +390,15 @@ const DiaryEntryPage = () => {
                 value={formData.text_report}
                 onChange={handleInputChange}
                 disabled={!canEdit}
-                placeholder="Describe your activities, learnings, challenges, and achievements for this day..."
+                placeholder={t('diary.reportPlaceholder')}
                 required
               />
-              <div className="form-text">
-                Provide a detailed description of your internship activities,
-                what you learned, challenges faced, and key achievements.
-              </div>
+              <div className="form-text">{t('diary.reportHelp')}</div>
             </div>
 
             <div className="mb-3">
               <label htmlFor="file" className="form-label">
-                Attachment (Optional)
+                {t('diary.attachment')}
               </label>
               <input
                 type="file"
@@ -379,16 +409,13 @@ const DiaryEntryPage = () => {
                 disabled={!canEdit}
                 accept="image/*,.pdf,.doc,.docx,.txt"
               />
-              <div className="form-text">
-                Upload images, documents, or other files related to your
-                internship activities. Maximum file size: 5MB
-              </div>
+              <div className="form-text">{t('diary.attachmentHelp')}</div>
             </div>
 
             {/* File Preview */}
             {filePreview && (
               <div className="mb-3">
-                <label className="form-label">File Preview</label>
+                <label className="form-label">{t('diary.filePreview')}</label>
                 <div className="border rounded p-3">
                   {filePreview.startsWith('data:image') ||
                   filePreview.includes('/uploads/') ? (
@@ -401,7 +428,7 @@ const DiaryEntryPage = () => {
                   ) : (
                     <div className="d-flex align-items-center">
                       <i className="bx bx-file me-2"></i>
-                      <span>File attached</span>
+                      <span>{t('diary.fileAttached')}</span>
                     </div>
                   )}
                 </div>
@@ -411,12 +438,16 @@ const DiaryEntryPage = () => {
             {/* Existing file info */}
             {existingEntry && existingEntry.file_url && !formData.file && (
               <div className="mb-3">
-                <label className="form-label">Current Attachment</label>
+                <label className="form-label">
+                  {t('diary.currentAttachment')}
+                </label>
                 <div className="border rounded p-3">
                   <div className="d-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center">
                       <i className="bx bx-file me-2"></i>
-                      <span>{existingEntry.file_name || 'Attachment'}</span>
+                      <span>
+                        {existingEntry.file_name || t('diary.attachment')}
+                      </span>
                       {existingEntry.file_size && (
                         <small className="text-muted ms-2">
                           ({Math.round(existingEntry.file_size / 1024)} KB)
@@ -430,7 +461,7 @@ const DiaryEntryPage = () => {
                       className="btn btn-sm btn-outline-primary"
                     >
                       <i className="bx bx-download me-1"></i>
-                      Download
+                      {t('diary.download')}
                     </a>
                   </div>
                 </div>
@@ -442,7 +473,7 @@ const DiaryEntryPage = () => {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={loading}
+                  disabled={loading || !isDateValid(formData.entry_date)}
                 >
                   {loading ? (
                     <>
@@ -450,12 +481,12 @@ const DiaryEntryPage = () => {
                         className="spinner-border spinner-border-sm me-2"
                         role="status"
                       ></span>
-                      Submitting...
+                      {t('diary.submitting')}
                     </>
                   ) : (
                     <>
                       <i className="bx bx-send me-1"></i>
-                      Submit Entry
+                      {t('diary.submitEntry')}
                     </>
                   )}
                 </button>
@@ -464,10 +495,10 @@ const DiaryEntryPage = () => {
                   type="button"
                   className="btn btn-outline-secondary"
                   onClick={e => handleSubmit(e, true)}
-                  disabled={loading}
+                  disabled={loading || !isDateValid(formData.entry_date)}
                 >
                   <i className="bx bx-save me-1"></i>
-                  Save as Draft
+                  {t('diary.saveAsDraft')}
                 </button>
               </div>
             )}
@@ -475,7 +506,7 @@ const DiaryEntryPage = () => {
             {!canEdit && (
               <div className="alert alert-info">
                 <i className="bx bx-info-circle me-2"></i>
-                This entry has been submitted and cannot be edited.
+                {t('diary.cannotEdit')}
               </div>
             )}
           </form>

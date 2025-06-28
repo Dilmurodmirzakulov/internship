@@ -1,18 +1,20 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import TeacherDashboard from './teacher/TeacherDashboard';
 import AdminDashboard from './admin/AdminDashboard';
 
 export const DashboardPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
 
   useEffect(() => {
     // Initialize dashboard analytics
     const initializeDashboard = () => {
       try {
-        if (typeof window.dashboardAnalitics === 'function') {
-          window.dashboardAnalitics();
-        } else {
+      if (typeof window.dashboardAnalitics === 'function') {
+        window.dashboardAnalitics();
+      } else {
           // Retry after a short delay if function isn't loaded yet
           if (typeof window.dashboardAnalitics === 'function') {
             window.dashboardAnalitics();
@@ -44,9 +46,9 @@ export const DashboardPage = () => {
       <div>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h4 className="fw-bold mb-1">Student Dashboard</h4>
+            <h4 className="fw-bold mb-1">{t('dashboard.studentDashboard')}</h4>
             <p className="text-muted mb-0">
-              Welcome back, {user?.name}! Track your internship progress.
+              {t('dashboard.welcomeBack', { name: user?.name })}
             </p>
           </div>
         </div>
@@ -58,14 +60,11 @@ export const DashboardPage = () => {
                 <div className="col-sm-7">
                   <div className="card-body">
                     <h5 className="card-title text-primary">
-                      Keep up the great work! 🎉
+                      {t('dashboard.keepUpGreatWork')}
                     </h5>
-                    <p className="mb-4">
-                      Document your daily activities and learnings in your
-                      internship diary.
-                    </p>
+                    <p className="mb-4">{t('dashboard.documentActivities')}</p>
                     <a href="/student/diary" className="btn btn-sm btn-primary">
-                      View My Diary
+                      {t('dashboard.viewMyDiary')}
                     </a>
                   </div>
                 </div>
@@ -90,18 +89,18 @@ export const DashboardPage = () => {
                     <i className="bx bx-book-open bx-lg"></i>
                   </span>
                 </div>
-                <h5 className="mb-2">Quick Actions</h5>
+                <h5 className="mb-2">{t('dashboard.quickActions')}</h5>
                 <div className="d-grid gap-2">
                   <a href="/student/diary/entry" className="btn btn-primary">
                     <i className="bx bx-plus me-1"></i>
-                    New Entry
+                    {t('dashboard.newEntry')}
                   </a>
                   <a
                     href="/student/diary"
                     className="btn btn-outline-secondary"
                   >
                     <i className="bx bx-book me-1"></i>
-                    View Diary
+                    {t('dashboard.viewDiary')}
                   </a>
                 </div>
               </div>
@@ -117,37 +116,37 @@ export const DashboardPage = () => {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h4 className="fw-bold mb-1">Welcome {user?.name}!</h4>
+          <h4 className="fw-bold mb-1">
+            {t('dashboard.welcome', { name: user?.name })}
+          </h4>
           <p className="text-muted mb-0">
-            You are logged in as <span className="fw-medium">{user?.role}</span>
-            . Contact your administrator if you need access.
+            {t('dashboard.loggedInAs', { role: user?.role })}
           </p>
         </div>
       </div>
 
-      <div className="card">
-        <div className="d-flex align-items-end row">
-          <div className="col-sm-7">
-            <div className="card-body">
-              <h5 className="card-title text-primary">Access Restricted 🔒</h5>
-              <p className="mb-4">
-                Your account doesn't have permission to access this dashboard.
-                Please contact your system administrator.
-              </p>
-            </div>
-          </div>
-          <div className="col-sm-5 text-center text-sm-left">
-            <div className="card-body pb-0 px-0 px-md-4">
-              <img
-                src="/assets/img/illustrations/man-with-laptop-light.png"
-                height="140"
+          <div className="card">
+            <div className="d-flex align-items-end row">
+              <div className="col-sm-7">
+                <div className="card-body">
+                  <h5 className="card-title text-primary">
+                {t('dashboard.accessRestricted')}
+                  </h5>
+              <p className="mb-4">{t('dashboard.noPermission')}</p>
+                </div>
+              </div>
+              <div className="col-sm-5 text-center text-sm-left">
+                <div className="card-body pb-0 px-0 px-md-4">
+                  <img
+                    src="/assets/img/illustrations/man-with-laptop-light.png"
+                    height="140"
                 alt="Access Restricted"
               />
+            </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

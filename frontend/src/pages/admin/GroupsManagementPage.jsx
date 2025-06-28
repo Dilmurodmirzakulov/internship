@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import API_BASE_URL from '../../config/api';
+import { formatDate } from '../../utils/dateUtils';
 
 const GroupsManagementPage = () => {
+  const { t } = useTranslation();
   const [groups, setGroups] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,10 +43,10 @@ const GroupsManagementPage = () => {
         const data = await response.json();
         setGroups(data.groups || []);
       } else {
-        setError('Failed to fetch groups');
+        setError(t('groups.failedToFetch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -99,18 +102,18 @@ const GroupsManagementPage = () => {
       if (response.ok) {
         setSuccess(
           editingGroup
-            ? 'Group updated successfully!'
-            : 'Group created successfully!'
+            ? t('groups.updatedSuccessfully')
+            : t('groups.createdSuccessfully')
         );
         setShowModal(false);
         resetForm();
         fetchGroups();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to save group');
+        setError(errorData.message || t('groups.failedToSave'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     }
   };
 
@@ -127,12 +130,7 @@ const GroupsManagementPage = () => {
   };
 
   const handleDelete = async groupId => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this group? This will affect all associated users.'
-      )
-    )
-      return;
+    if (!confirm(t('groups.confirmDelete'))) return;
 
     try {
       const { token } = useAuthStore.getState();
@@ -144,14 +142,14 @@ const GroupsManagementPage = () => {
       });
 
       if (response.ok) {
-        setSuccess('Group deleted successfully!');
+        setSuccess(t('groups.deletedSuccessfully'));
         fetchGroups();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to delete group');
+        setError(errorData.message || t('groups.failedToDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
     }
   };
 
@@ -169,7 +167,7 @@ const GroupsManagementPage = () => {
   const getStatusBadge = isActive => {
     return (
       <span className={`badge bg-${isActive ? 'success' : 'secondary'}`}>
-        {isActive ? 'Active' : 'Inactive'}
+        {isActive ? t('common.active') : t('common.inactive')}
       </span>
     );
   };
@@ -184,10 +182,8 @@ const GroupsManagementPage = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h4 className="fw-bold mb-1">Groups Management</h4>
-          <p className="text-muted mb-0">
-            Manage internship groups and assign students to programs
-          </p>
+          <h4 className="fw-bold mb-1">{t('groups.title')}</h4>
+          <p className="text-muted mb-0">{t('groups.subtitle')}</p>
         </div>
         <button
           type="button"
@@ -198,7 +194,7 @@ const GroupsManagementPage = () => {
           }}
         >
           <i className="bx bx-plus me-1"></i>
-          Add Group
+          {t('groups.addGroup')}
         </button>
       </div>
 
@@ -219,7 +215,7 @@ const GroupsManagementPage = () => {
         {loading ? (
           <div className="col-12 d-flex justify-content-center">
             <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <span className="visually-hidden">{t('common.loading')}</span>
             </div>
           </div>
         ) : groups.length === 0 ? (
@@ -231,10 +227,9 @@ const GroupsManagementPage = () => {
                     <i className="bx bx-group bx-lg"></i>
                   </span>
                 </div>
-                <h5 className="mb-2">No Groups Found</h5>
+                <h5 className="mb-2">{t('groups.noGroupsFound')}</h5>
                 <p className="text-muted mb-4">
-                  Create your first internship group to start organizing
-                  students.
+                  {t('groups.createFirstGroup')}
                 </p>
                 <button
                   className="btn btn-primary"
@@ -244,7 +239,7 @@ const GroupsManagementPage = () => {
                   }}
                 >
                   <i className="bx bx-plus me-1"></i>
-                  Create First Group
+                  {t('groups.createFirstGroupButton')}
                 </button>
               </div>
             </div>
@@ -273,13 +268,15 @@ const GroupsManagementPage = () => {
                           className="dropdown-item"
                           onClick={() => handleEdit(group)}
                         >
-                          <i className="bx bx-edit-alt me-1"></i> Edit
+                          <i className="bx bx-edit-alt me-1"></i>{' '}
+                          {t('common.edit')}
                         </button>
                         <button
                           className="dropdown-item text-danger"
                           onClick={() => handleDelete(group.id)}
                         >
-                          <i className="bx bx-trash me-1"></i> Delete
+                          <i className="bx bx-trash me-1"></i>{' '}
+                          {t('common.delete')}
                         </button>
                       </div>
                     </div>
@@ -297,28 +294,34 @@ const GroupsManagementPage = () => {
                     <div className="col-6">
                       <div className="d-flex flex-column">
                         <h6 className="mb-0">{getStudentCount(group)}</h6>
-                        <small className="text-muted">Students</small>
+                        <small className="text-muted">
+                          {t('groups.students')}
+                        </small>
                       </div>
                     </div>
                     <div className="col-6">
                       <div className="d-flex flex-column">
                         <h6 className="mb-0">{group.max_students || 30}</h6>
-                        <small className="text-muted">Max Capacity</small>
+                        <small className="text-muted">
+                          {t('groups.maxCapacity')}
+                        </small>
                       </div>
                     </div>
                   </div>
 
                   {group.program && (
                     <div className="mt-3">
-                      <small className="text-muted">Program:</small>
+                      <small className="text-muted">
+                        {t('groups.program')}:
+                      </small>
                       <p className="mb-0 fw-medium">{group.program.name}</p>
                     </div>
                   )}
 
                   <div className="mt-3">
-                    <small className="text-muted">Created:</small>
+                    <small className="text-muted">{t('groups.created')}:</small>
                     <p className="mb-0">
-                      {new Date(group.created_at).toLocaleDateString()}
+                      {formatDate(group.created_at, t('common.notSet'))}
                     </p>
                   </div>
                 </div>
@@ -339,7 +342,9 @@ const GroupsManagementPage = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {editingGroup ? 'Edit Group' : 'Add New Group'}
+                  {editingGroup
+                    ? t('groups.editGroup')
+                    : t('groups.addNewGroup')}
                 </h5>
                 <button
                   type="button"
@@ -350,39 +355,45 @@ const GroupsManagementPage = () => {
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Group Name *</label>
+                    <label className="form-label">
+                      {t('groups.groupName')} *
+                    </label>
                     <input
                       type="text"
                       className="form-control"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="e.g., Software Engineering Group A"
+                      placeholder={t('groups.groupNamePlaceholder')}
                       required
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Description</label>
+                    <label className="form-label">
+                      {t('groups.description')}
+                    </label>
                     <textarea
                       className="form-control"
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
                       rows="3"
-                      placeholder="Brief description of the group..."
+                      placeholder={t('groups.descriptionPlaceholder')}
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Internship Program</label>
+                    <label className="form-label">
+                      {t('groups.internshipProgram')}
+                    </label>
                     <select
                       className="form-select"
                       name="program_id"
                       value={formData.program_id}
                       onChange={handleInputChange}
                     >
-                      <option value="">Select Program</option>
+                      <option value="">{t('groups.selectProgram')}</option>
                       {programs.map(program => (
                         <option key={program.id} value={program.id}>
                           {program.name}
@@ -392,7 +403,9 @@ const GroupsManagementPage = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Maximum Students</label>
+                    <label className="form-label">
+                      {t('groups.maximumStudents')}
+                    </label>
                     <input
                       type="number"
                       className="form-control"
@@ -403,8 +416,7 @@ const GroupsManagementPage = () => {
                       max="100"
                     />
                     <div className="form-text">
-                      Maximum number of students that can be assigned to this
-                      group
+                      {t('groups.maximumStudentsHelp')}
                     </div>
                   </div>
 
@@ -417,7 +429,9 @@ const GroupsManagementPage = () => {
                         checked={formData.is_active}
                         onChange={handleInputChange}
                       />
-                      <label className="form-check-label">Active Group</label>
+                      <label className="form-check-label">
+                        {t('groups.activeGroup')}
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -427,10 +441,12 @@ const GroupsManagementPage = () => {
                     className="btn btn-outline-secondary"
                     onClick={() => setShowModal(false)}
                   >
-                    Cancel
+                    {t('groups.cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary">
-                    {editingGroup ? 'Update Group' : 'Create Group'}
+                    {editingGroup
+                      ? t('groups.updateGroup')
+                      : t('groups.createGroup')}
                   </button>
                 </div>
               </form>

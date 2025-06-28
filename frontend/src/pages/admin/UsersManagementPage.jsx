@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import API_BASE_URL from '../../config/api';
+import { formatDate } from '../../utils/dateUtils';
 
 const UsersManagementPage = () => {
   const { t } = useTranslation();
@@ -465,7 +466,7 @@ const UsersManagementPage = () => {
                         </td>
                         <td>
                           <small className="text-muted">
-                            {new Date(user.created_at).toLocaleDateString()}
+                            {formatDate(user.created_at, t('common.notSet'))}
                           </small>
                         </td>
                         <td>
