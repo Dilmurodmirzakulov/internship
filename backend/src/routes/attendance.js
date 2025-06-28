@@ -113,4 +113,107 @@ router.get("/group/:groupId", requireTeacher, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/attendance/student/:studentId
+ * Fetch attendance for a student on a given date range
+ */
+router.get("/student/:studentId", requireTeacher, async (req, res) => {
+  const { studentId } = req.params;
+  const dateFrom = req.query.start_date;
+  const dateTo = req.query.end_date;
+  try {
+    // Teachers must have student in their groups
+    if (req.user.role === "teacher") {
+      const teacher = await User.findByPk(req.user.id, {
+        include: [{ model: Group, as: "assignedGroups", attributes: ["id"] }],
+      });
+      const allowedGroupIds = teacher.assignedGroups.map((g) => g.id);
+      const student = await User.findByPk(studentId, {
+        attributes: ["group_id"],
+      });
+      if (!student || !allowedGroupIds.includes(student.group_id)) {
+        return res.status(403).json({ message: "Access denied." });
+      }
+    }
+
+    // Build where clause
+    const where = { student_id: studentId };
+    if (dateFrom && dateTo)
+      where.date = { [require("sequelize").Op.between]: [dateFrom, dateTo] };
+
+    const records = await Attendance.findAll({ where });
+    res.json({ attendance: records });
+  } catch (error) {
+    console.error("Attendance student fetch error:", error);
+    res.status(500).json({ message: "Server error." });
+  }
+});
+
+// Student can fetch own attendance
+router.get("/my", async (req, res) => {
+  if (!req.user)
+    return res.status(401).json({ message: "Authentication required." });
+  if (req.user.role !== "student") {
+    return res.status(403).json({ message: "Students only." });
+  }
+  const dateFrom = req.query.start_date;
+  const dateTo = req.query.end_date;
+  try {
+    const where = { student_id: req.user.id };
+    if (dateFrom && dateTo)
+      where.date = { [require("sequelize").Op.between]: [dateFrom, dateTo] };
+    const records = await Attendance.findAll({ where });
+    res.json({ attendance: records });
+  } catch (error) {
+    console.error("Attendance my fetch error:", error);
+    res.status(500).json({ message: "Server error." });
+  }
+});
+
+/** Update single attendance record */
+router.put(
+  "/:attendanceId",
+  requireTeacher,
+  [
+    body("status")
+      .isIn(["present", "absent", "excused"])
+      .withMessage("Invalid status"),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    const { attendanceId } = req.params;
+    const { status } = req.body;
+    try {
+      const record = await Attendance.findByPk(attendanceId);
+      if (!record)
+        return res
+          .status(404)
+          .json({ message: "Attendance record not found." });
+
+      // permission
+      if (req.user.role === "teacher") {
+        const teacher = await User.findByPk(req.user.id, {
+          include: [{ model: Group, as: "assignedGroups", attributes: ["id"] }],
+        });
+        const allowedGroupIds = teacher.assignedGroups.map((g) => g.id);
+        const student = await User.findByPk(record.student_id, {
+          attributes: ["group_id"],
+        });
+        if (!student || !allowedGroupIds.includes(student.group_id)) {
+          return res.status(403).json({ message: "Access denied." });
+        }
+      }
+
+      record.status = status;
+      await record.save();
+      res.json({ message: "Attendance updated.", record });
+    } catch (error) {
+      console.error("Attendance update error:", error);
+      res.status(500).json({ message: "Server error." });
+    }
+  }
+);
+
 module.exports = router;
