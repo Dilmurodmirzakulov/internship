@@ -55,15 +55,24 @@ const allowedOrigins = [
 
 console.log("🌐 Allowed CORS origins:", allowedOrigins);
 console.log("🌍 Environment:", process.env.NODE_ENV);
+console.log("🔧 CORS_ORIGIN env var:", process.env.CORS_ORIGIN);
+console.log("🔧 FRONTEND_URL env var:", process.env.FRONTEND_URL);
 
 app.use(
   cors({
     origin: function (origin, callback) {
       console.log("🔍 CORS request from origin:", origin);
+      console.log("🔍 Allowed origins list:", allowedOrigins);
 
       // Allow requests with no origin (like mobile apps, curl requests, or same-origin requests)
       if (!origin) {
         console.log("✅ CORS allowed for request with no origin");
+        return callback(null, true);
+      }
+
+      // Temporary: Allow all origins for debugging (REMOVE IN PRODUCTION)
+      if (process.env.ALLOW_ALL_ORIGINS === "true") {
+        console.log("⚠️ WARNING: Allowing all origins for debugging");
         return callback(null, true);
       }
 
@@ -80,20 +89,30 @@ app.use(
           return callback(null, true);
         }
       } else {
-        // In production, be more strict but still allow known domains
+        // In production, check exact matches first, then patterns
+        if (allowedOrigins.indexOf(origin) !== -1) {
+          console.log("✅ CORS allowed for production (exact match):", origin);
+          return callback(null, true);
+        }
+
+        // Then check patterns
         if (
-          allowedOrigins.indexOf(origin) !== -1 ||
           origin.includes("netlify.app") ||
           origin.includes("vercel.app") ||
           origin.includes("railway.app") ||
-          origin.includes("render.com")
+          origin.includes("render.com") ||
+          origin.includes("railway.com") // Temporary fix for Railway dashboard
         ) {
-          console.log("✅ CORS allowed for production:", origin);
+          console.log(
+            "✅ CORS allowed for production (pattern match):",
+            origin
+          );
           return callback(null, true);
         }
       }
 
       console.log("❌ CORS blocked for:", origin);
+      console.log("❌ Origin not in allowed list:", allowedOrigins);
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
