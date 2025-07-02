@@ -22,8 +22,16 @@ const { auth: authMiddleware } = require("./src/middleware/auth");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Trust proxy for Railway deployment
+// Trust proxy for Railway deployment and other cloud platforms
 app.set("trust proxy", true);
+
+// Production security headers
+if (process.env.NODE_ENV === "production") {
+  app.use((req, res, next) => {
+    res.setHeader("X-Powered-By", "Internship Tracker API");
+    next();
+  });
+}
 
 // Security middleware
 app.use(
@@ -36,40 +44,85 @@ app.use(
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
+  "http://localhost:5174", // Vite dev server alternative port
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
   "https://beautiful-boba-4352fc.netlify.app",
   "https://685f9488966d03230038ae17--beautiful-boba-4352fc.netlify.app", // Latest deploy URL
   process.env.FRONTEND_URL,
+  process.env.CORS_ORIGIN,
 ].filter(Boolean);
 
 console.log("🌐 Allowed CORS origins:", allowedOrigins);
+console.log("🌍 Environment:", process.env.NODE_ENV);
 
 app.use(
   cors({
     origin: function (origin, callback) {
       console.log("🔍 CORS request from origin:", origin);
 
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      // Be more permissive - allow all Netlify domains and localhost
-      if (
-        allowedOrigins.indexOf(origin) !== -1 ||
-        origin.includes("netlify.app") ||
-        origin.includes("localhost")
-      ) {
-        console.log("✅ CORS allowed for:", origin);
-        callback(null, true);
-      } else {
-        console.log("❌ CORS blocked for:", origin);
-        callback(new Error("Not allowed by CORS"));
+      // Allow requests with no origin (like mobile apps, curl requests, or same-origin requests)
+      if (!origin) {
+        console.log("✅ CORS allowed for request with no origin");
+        return callback(null, true);
       }
+
+      // In development, be more permissive
+      if (process.env.NODE_ENV === "development") {
+        if (
+          allowedOrigins.indexOf(origin) !== -1 ||
+          origin.includes("localhost") ||
+          origin.includes("127.0.0.1") ||
+          origin.includes("netlify.app") ||
+          origin.includes("vercel.app")
+        ) {
+          console.log("✅ CORS allowed for development:", origin);
+          return callback(null, true);
+        }
+      } else {
+        // In production, be more strict but still allow known domains
+        if (
+          allowedOrigins.indexOf(origin) !== -1 ||
+          origin.includes("netlify.app") ||
+          origin.includes("vercel.app") ||
+          origin.includes("railway.app") ||
+          origin.includes("render.com")
+        ) {
+          console.log("✅ CORS allowed for production:", origin);
+          return callback(null, true);
+        }
+      }
+
+      console.log("❌ CORS blocked for:", origin);
+      callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+    ],
+    exposedHeaders: ["Content-Length", "X-Requested-With"],
+    maxAge: 86400, // 24 hours for preflight cache
   })
 );
+
+// Explicit OPTIONS handler for all routes
 app.options("*", cors());
+
+// Add CORS debugging middleware
+app.use((req, res, next) => {
+  const origin = req.get("Origin");
+  if (origin) {
+    console.log(
+      `🔍 Request from origin: ${origin} to ${req.method} ${req.path}`
+    );
+  }
+  next();
+});
 
 console.log("🚀 Rate limiting DISABLED for debugging");
 
@@ -161,6 +214,22 @@ app.get("/api/health", async (req, res) => {
       environment: process.env.NODE_ENV || "development",
     });
   }
+});
+
+// CORS test endpoint
+app.get("/api/cors-test", (req, res) => {
+  const origin = req.get("Origin");
+  res.json({
+    message: "CORS is working!",
+    origin: origin || "No origin header",
+    timestamp: new Date().toISOString(),
+    headers: {
+      "access-control-allow-origin": res.get("Access-Control-Allow-Origin"),
+      "access-control-allow-credentials": res.get(
+        "Access-Control-Allow-Credentials"
+      ),
+    },
+  });
 });
 
 // Error handling middleware

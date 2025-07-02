@@ -9,7 +9,8 @@
     "test": "jest",
     "migrate": "node src/database/migrate.js",
     "seed": "node seed.js",
-    "seed:railway": "node seed-railway.js"
+    "seed:railway": "node seed-railway.js",
+    "seed:production": "node seed-production.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
