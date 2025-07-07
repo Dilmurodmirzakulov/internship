@@ -166,8 +166,14 @@ const UsersManagementPage = () => {
         ) {
           submitData.group_id = submitData.assigned_group_ids[0];
         } else {
-          submitData.group_id = '';
+          // Do not send group_id if multiple groups selected
+          delete submitData.group_id;
         }
+      }
+
+      // Remove group_id from payload if empty string for any role
+      if (submitData.group_id === '') {
+        delete submitData.group_id;
       }
 
       const response = await fetch(url, {
