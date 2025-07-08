@@ -6,6 +6,7 @@ import NotificationDropdown from '../components/NotificationDropdown';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import getGreetingMessage from '../utils/greetingHandler';
 import API_BASE_URL from '../config/api';
+import FILE_BASE_URL from '../config/file';
 
 const Navbar = () => {
   const { user, logout } = useAuthStore();
@@ -81,7 +82,7 @@ const Navbar = () => {
               <div className="avatar avatar-online">
                 {user?.profile_image ? (
                   <img
-                    src={`${API_BASE_URL}/uploads/${user.profile_image}`}
+                    src={`${FILE_BASE_URL}/uploads/${user.profile_image}`}
                     alt="Profile"
                     className="w-px-40 h-px-40 rounded-circle"
                   />
@@ -100,7 +101,7 @@ const Navbar = () => {
                       <div className="avatar avatar-online">
                         {user?.profile_image ? (
                           <img
-                            src={`${API_BASE_URL}/uploads/${user.profile_image}`}
+                            src={`${FILE_BASE_URL}/uploads/${user.profile_image}`}
                             alt="Profile"
                             className="w-px-40 h-px-40 rounded-circle"
                           />

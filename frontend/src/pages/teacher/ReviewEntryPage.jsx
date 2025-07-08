@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import API_BASE_URL from '../../config/api';
+import FILE_BASE_URL from '../../config/file';
 
 const ReviewEntryPage = () => {
   const [entry, setEntry] = useState(null);
@@ -35,7 +36,17 @@ const ReviewEntryPage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setEntry(data.entry);
+        // Ensure file_url is absolute
+        const entryWithFullUrl = {
+          ...data.entry,
+          file_url: data.entry.file_url
+            ? data.entry.file_url.startsWith('http')
+              ? data.entry.file_url
+              : `${FILE_BASE_URL}${data.entry.file_url}`
+            : null,
+        };
+
+        setEntry(entryWithFullUrl);
 
         // Pre-fill form if already marked
         if (data.entry.mark !== null) {

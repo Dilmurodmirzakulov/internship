@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import API_BASE_URL from '../../config/api';
+import FILE_BASE_URL from '../../config/file';
 
 const DiaryEntryPage = () => {
   const { t } = useTranslation();
@@ -66,15 +67,25 @@ const DiaryEntryPage = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.entry) {
-          setExistingEntry(data.entry);
+          // Ensure file_url is absolute using FILE_BASE_URL
+          const entryWithFullUrl = {
+            ...data.entry,
+            file_url: data.entry.file_url
+              ? data.entry.file_url.startsWith('http')
+                ? data.entry.file_url
+                : `${FILE_BASE_URL}${data.entry.file_url}`
+              : null,
+          };
+
+          setExistingEntry(entryWithFullUrl);
           setIsEditing(true);
           setFormData({
-            entry_date: data.entry.entry_date,
-            text_report: data.entry.text_report || '',
+            entry_date: entryWithFullUrl.entry_date,
+            text_report: entryWithFullUrl.text_report || '',
             file: null,
           });
-          if (data.entry.file_url) {
-            setFilePreview(data.entry.file_url);
+          if (entryWithFullUrl.file_url) {
+            setFilePreview(entryWithFullUrl.file_url);
           }
         }
       }

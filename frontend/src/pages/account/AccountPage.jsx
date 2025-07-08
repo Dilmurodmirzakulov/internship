@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import API_BASE_URL from '../../config/api';
+import FILE_BASE_URL from '../../config/file';
 
 // Validation schemas will be created inside the component to access translations
 
@@ -41,7 +42,7 @@ export const AccountPage = () => {
   useEffect(() => {
     // Set initial profile image preview
     if (user?.profile_image) {
-      setProfileImagePreview(`${API_BASE_URL}/uploads/${user.profile_image}`);
+      setProfileImagePreview(`${FILE_BASE_URL}/uploads/${user.profile_image}`);
     }
   }, [user]);
 
@@ -75,7 +76,7 @@ export const AccountPage = () => {
   const handleResetImage = () => {
     setProfileImage(null);
     if (user?.profile_image) {
-      setProfileImagePreview(`${API_BASE_URL}/uploads/${user.profile_image}`);
+      setProfileImagePreview(`${FILE_BASE_URL}/uploads/${user.profile_image}`);
     } else {
       setProfileImagePreview(null);
     }
@@ -153,7 +154,7 @@ export const AccountPage = () => {
         // Update preview with new image
         if (data.user.profile_image) {
           setProfileImagePreview(
-            `${API_BASE_URL}/uploads/${data.user.profile_image}`
+            `${FILE_BASE_URL}/uploads/${data.user.profile_image}`
           );
         }
       } else {
