@@ -128,44 +128,9 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      console.log("🔍 CORS request from origin:", origin);
-      console.log("🔍 Allowed origins list:", allowedOrigins);
-
-      // Allow requests with no origin (like mobile apps, curl requests, or same-origin requests)
-      if (!origin) {
-        console.log("✅ CORS allowed for request with no origin");
-        return callback(null, true);
-      }
-
-      // Temporary: Allow all origins for debugging via env flag
-      if (process.env.ALLOW_ALL_ORIGINS === "true") {
-        console.log("⚠️ WARNING: Allowing all origins for debugging");
-        return callback(null, true);
-      }
-
-      const isAllowedExact = allowedOrigins.includes(origin);
-      const isAllowedByPattern = allowedDomainPatterns.some((rx) =>
-        rx.test(origin)
-      );
-
-      if (isAllowedExact || isAllowedByPattern) {
-        console.log("✅ CORS allowed:", origin);
-        return callback(null, true);
-      }
-
-      // In development, be more permissive
-      if (process.env.NODE_ENV !== "production") {
-        if (/localhost|127\.0\.0\.1/i.test(origin)) {
-          console.log("✅ CORS allowed for development:", origin);
-          return callback(null, true);
-        }
-      }
-
-      console.log("❌ CORS blocked for:", origin);
-      console.log("❌ Origin not in allowed list:", allowedOrigins);
-      return callback(new Error("Not allowed by CORS"));
-    },
+    // Allow requests through; actual ACAO is controlled by our header setter above
+    // This avoids 500 errors like "Not allowed by CORS" from the cors package
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
