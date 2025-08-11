@@ -61,9 +61,10 @@ export const useAuthStore = create<AuthState>()(
           const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+              // Use a CORS-safelisted content type to avoid preflight on login
+              'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({ email, password }),
+            body: new URLSearchParams({ email, password }).toString(),
           });
 
           console.log('AuthStore: Response status:', response.status);

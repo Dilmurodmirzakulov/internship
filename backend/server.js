@@ -62,15 +62,19 @@ const allowedDomainPatterns = [
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
     const requestOrigin = req.get("Origin");
-    const isAllowedExact = requestOrigin && allowedOrigins.includes(requestOrigin);
-    const isAllowedByPattern = requestOrigin && allowedDomainPatterns.some((rx) => rx.test(requestOrigin));
+    const isAllowedExact =
+      requestOrigin && allowedOrigins.includes(requestOrigin);
+    const isAllowedByPattern =
+      requestOrigin &&
+      allowedDomainPatterns.some((rx) => rx.test(requestOrigin));
 
     if (
       process.env.ALLOW_ALL_ORIGINS === "true" ||
       isAllowedExact ||
       isAllowedByPattern ||
       (process.env.NODE_ENV !== "production" &&
-        requestOrigin && /^(https?:\/\/)?(localhost|127\.0\.0\.1)/i.test(requestOrigin))
+        requestOrigin &&
+        /^(https?:\/\/)?(localhost|127\.0\.0\.1)/i.test(requestOrigin))
     ) {
       res.header("Access-Control-Allow-Origin", requestOrigin);
       res.header("Vary", "Origin");
