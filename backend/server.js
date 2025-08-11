@@ -33,7 +33,7 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// CORS configuration
+// CORS configuration 
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
