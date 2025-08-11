@@ -33,13 +33,6 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// Security middleware
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
-
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173",
@@ -64,6 +57,45 @@ const allowedDomainPatterns = [
   /railway\.app$/i,
   /render\.com$/i,
 ];
+
+// Top-level manual preflight responder to satisfy edge proxies before any other middleware
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    const requestOrigin = req.get("Origin");
+    const isAllowedExact = requestOrigin && allowedOrigins.includes(requestOrigin);
+    const isAllowedByPattern = requestOrigin && allowedDomainPatterns.some((rx) => rx.test(requestOrigin));
+
+    if (
+      process.env.ALLOW_ALL_ORIGINS === "true" ||
+      isAllowedExact ||
+      isAllowedByPattern ||
+      (process.env.NODE_ENV !== "production" &&
+        requestOrigin && /^(https?:\/\/)?(localhost|127\.0\.0\.1)/i.test(requestOrigin))
+    ) {
+      res.header("Access-Control-Allow-Origin", requestOrigin);
+      res.header("Vary", "Origin");
+      res.header("Access-Control-Allow-Credentials", "true");
+      res.header(
+        "Access-Control-Allow-Methods",
+        "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+      );
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Content-Type,Authorization,X-Requested-With,Accept,Origin"
+      );
+      res.header("Access-Control-Max-Age", "86400");
+    }
+    return res.status(204).end();
+  }
+  return next();
+});
+
+// Security middleware
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 console.log("🌐 Allowed CORS origins:", allowedOrigins);
 console.log("🌍 Environment:", process.env.NODE_ENV);
