@@ -47,13 +47,11 @@ const allowedOrigins = [
   "http://localhost:5174", // Vite dev server alternative port
   "http://127.0.0.1:5173",
   "http://127.0.0.1:3000",
-  "https://techamal.uz",
-  "https://www.techamal.uz",
-  "https://api.techamal.uz",
-  "/.netlify.app$/",
-  "/.railway.app$/", // Railway
-  "/.localhost:d+$/", // Localhost
-  "/.127.0.0.1:d+$/", // Localhost
+  "https://beautiful-boba-4352fc.netlify.app",
+  "https://685f9488966d03230038ae17--beautiful-boba-4352fc.netlify.app", // Latest deploy URL
+  "https://techamal-production.up.railway.app", // Railway public URL
+  "https://techamal.uz", // Production frontend domain
+  "https://www.techamal.uz", // Production frontend (www) domain
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN,
 ].filter(Boolean);
@@ -102,6 +100,7 @@ app.use(
 
         // Then check patterns
         if (
+          origin.includes("techamal.uz") || // allow all subdomains
           origin.includes("netlify.app") ||
           origin.includes("vercel.app") ||
           origin.includes("railway.app") ||
