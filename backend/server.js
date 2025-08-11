@@ -56,10 +56,43 @@ const allowedOrigins = [
   process.env.CORS_ORIGIN,
 ].filter(Boolean);
 
+// Regex-based domain patterns for robust matching in production
+const allowedDomainPatterns = [
+  /^https?:\/\/([a-z0-9-]+\.)*techamal\.uz$/i,
+  /netlify\.app$/i,
+  /vercel\.app$/i,
+  /railway\.app$/i,
+  /render\.com$/i,
+];
+
 console.log("🌐 Allowed CORS origins:", allowedOrigins);
 console.log("🌍 Environment:", process.env.NODE_ENV);
 console.log("🔧 CORS_ORIGIN env var:", process.env.CORS_ORIGIN);
 console.log("🔧 FRONTEND_URL env var:", process.env.FRONTEND_URL);
+
+// Early header setter to ensure ACAO is present even on error responses
+app.use((req, res, next) => {
+  const requestOrigin = req.get("Origin");
+  if (requestOrigin) {
+    const isAllowedExact = allowedOrigins.includes(requestOrigin);
+    const isAllowedByPattern = allowedDomainPatterns.some((rx) =>
+      rx.test(requestOrigin)
+    );
+    if (
+      process.env.ALLOW_ALL_ORIGINS === "true" ||
+      isAllowedExact ||
+      isAllowedByPattern ||
+      // Always allow localhost-like origins in non-production
+      (process.env.NODE_ENV !== "production" &&
+        /^(https?:\/\/)?(localhost|127\.0\.0\.1)/i.test(requestOrigin))
+    ) {
+      res.header("Access-Control-Allow-Origin", requestOrigin);
+      res.header("Vary", "Origin");
+      res.header("Access-Control-Allow-Credentials", "true");
+    }
+  }
+  next();
+});
 
 app.use(
   cors({
@@ -73,51 +106,33 @@ app.use(
         return callback(null, true);
       }
 
-      // Temporary: Allow all origins for debugging (REMOVE IN PRODUCTION)
+      // Temporary: Allow all origins for debugging via env flag
       if (process.env.ALLOW_ALL_ORIGINS === "true") {
         console.log("⚠️ WARNING: Allowing all origins for debugging");
         return callback(null, true);
       }
 
-      // In development, be more permissive
-      if (process.env.NODE_ENV === "development") {
-        if (
-          allowedOrigins.indexOf(origin) !== -1 ||
-          origin.includes("localhost") ||
-          origin.includes("127.0.0.1") ||
-          origin.includes("netlify.app") ||
-          origin.includes("vercel.app")
-        ) {
-          console.log("✅ CORS allowed for development:", origin);
-          return callback(null, true);
-        }
-      } else {
-        // In production, check exact matches first, then patterns
-        if (allowedOrigins.indexOf(origin) !== -1) {
-          console.log("✅ CORS allowed for production (exact match):", origin);
-          return callback(null, true);
-        }
+      const isAllowedExact = allowedOrigins.includes(origin);
+      const isAllowedByPattern = allowedDomainPatterns.some((rx) =>
+        rx.test(origin)
+      );
 
-        // Then check patterns
-        if (
-          origin.includes("techamal.uz") || // allow all subdomains
-          origin.includes("netlify.app") ||
-          origin.includes("vercel.app") ||
-          origin.includes("railway.app") ||
-          origin.includes("render.com") ||
-          origin.includes("railway.com") // Temporary fix for Railway dashboard
-        ) {
-          console.log(
-            "✅ CORS allowed for production (pattern match):",
-            origin
-          );
+      if (isAllowedExact || isAllowedByPattern) {
+        console.log("✅ CORS allowed:", origin);
+        return callback(null, true);
+      }
+
+      // In development, be more permissive
+      if (process.env.NODE_ENV !== "production") {
+        if (/localhost|127\.0\.0\.1/i.test(origin)) {
+          console.log("✅ CORS allowed for development:", origin);
           return callback(null, true);
         }
       }
 
       console.log("❌ CORS blocked for:", origin);
       console.log("❌ Origin not in allowed list:", allowedOrigins);
-      callback(new Error("Not allowed by CORS"));
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -130,11 +145,15 @@ app.use(
     ],
     exposedHeaders: ["Content-Length", "X-Requested-With"],
     maxAge: 86400, // 24 hours for preflight cache
+    optionsSuccessStatus: 204,
+    preflightContinue: false,
   })
 );
 
 // Explicit OPTIONS handler for all routes
 app.options("*", cors());
+// Specific preflight handler for auth endpoints (helps some proxies)
+app.options("/api/auth/*", cors());
 
 // Add CORS debugging middleware
 app.use((req, res, next) => {
