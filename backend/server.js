@@ -48,8 +48,10 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "http://127.0.0.1:3000",
   "https://beautiful-boba-4352fc.netlify.app",
+  "http://techamal.uz",
   "https://685f9488966d03230038ae17--beautiful-boba-4352fc.netlify.app", // Latest deploy URL
   "https://techamal-production.up.railway.app", // Add your Railway public URL
+  "https://api.techamal.uz/",
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN,
 ].filter(Boolean);

@@ -1,4 +1,4 @@
 const FILE_BASE_URL =
-  import.meta.env.FILE_BASE_URL || 'https://techamal-production.up.railway.app';
+  import.meta.env.FILE_BASE_URL || 'https://api.techamal.uz/';
 
 export default FILE_BASE_URL;
